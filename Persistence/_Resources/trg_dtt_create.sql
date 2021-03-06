@@ -1,0 +1,6 @@
+CREATE TRIGGER {0}
+{1} {2}
+ON public.{3}
+FOR EACH ROW
+EXECUTE PROCEDURE public.{4}();
+
