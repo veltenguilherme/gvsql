@@ -20,8 +20,6 @@ namespace Persistence
             UserName = userName;
             Password = password;
 
-            //tesete
-
             this.Create();
         }
 
