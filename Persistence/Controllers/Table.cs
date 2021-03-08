@@ -39,6 +39,11 @@ namespace Persistence.Controllers
             return result;
         }
 
+        public async Task<List<T>> ToListAsync()
+        {
+            return await new View<T>().ToListAsync();
+        }
+
         public async Task<List<T>> ToListAsync(string sql, bool exception = true)
         {
             var result = await new View<T>().ToListAsync(sql);

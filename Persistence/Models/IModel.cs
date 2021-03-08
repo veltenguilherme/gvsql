@@ -21,6 +21,8 @@ namespace Persistence.Models
         BIG_INT,
         NUMERIC_DEFAULT_VALUE_0,
         BOOLEAN,
+        BYTEA,
+        BYTEA_NOT_NULL,
         DEFAULT
     }
 

@@ -70,6 +70,8 @@ namespace Persistence.Controllers.Base.Table
                 case DataType.BIG_INT: sql.Add($"{columName} bigint,"); return;
                 case DataType.NUMERIC_DEFAULT_VALUE_0: sql.Add($"{columName} numeric DEFAULT 0.00,"); return;
                 case DataType.BOOLEAN: sql.Add($"{columName} boolean,"); return;
+                case DataType.BYTEA: sql.Add($"{columName} bytea,"); return;
+                case DataType.BYTEA_NOT_NULL: sql.Add($"{columName} bytea NOT NULL,"); return;
                 case DataType.GUID:
                 case DataType.DEFAULT:
                 default: return;
