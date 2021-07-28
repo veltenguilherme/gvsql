@@ -66,6 +66,7 @@ namespace Persistence.Controllers.Base.Table
                 case DataType.TEXT: sql.Add($"{columName} text,"); return;
                 case DataType.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL: sql.Add($"{columName} timestamp without time zone NOT NULL,"); return;
                 case DataType.TIMESTAMP_WITHOUT_TIME_ZONE: sql.Add($"{columName} timestamp without time zone,"); return;
+                case DataType.DATE: sql.Add($"{columName} date,"); return;
                 case DataType.INTEGER: sql.Add($"{columName} integer,"); return;
                 case DataType.BIG_INT: sql.Add($"{columName} bigint,"); return;
                 case DataType.NUMERIC_DEFAULT_VALUE_0: sql.Add($"{columName} numeric DEFAULT 0.00,"); return;

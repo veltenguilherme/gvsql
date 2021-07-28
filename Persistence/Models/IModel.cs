@@ -17,6 +17,7 @@ namespace Persistence.Models
         TEXT_NOT_NULL_UNIQUE,
         TIMESTAMP_WITHOUT_TIME_ZONE,
         TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL,
+        DATE,
         INTEGER,
         BIG_INT,
         NUMERIC_DEFAULT_VALUE_0,
