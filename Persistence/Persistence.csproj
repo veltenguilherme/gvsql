@@ -5,7 +5,7 @@
 	<LangVersion>8.0</LangVersion>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<PackageId>gvsql</PackageId>
-	<Version>1.8.0</Version>
+	<Version>1.8.1</Version>
 	<Description>An C# framework for persistence, query lambda and creation of postgresql data schemas, similar to the entity framework. But much better...</Description>
 	<Authors>gvelten</Authors>
 	<Company>veltenguilherme@gmail.com</Company>
