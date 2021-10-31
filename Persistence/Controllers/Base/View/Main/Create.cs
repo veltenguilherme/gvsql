@@ -46,7 +46,8 @@ namespace Persistence.Controllers.Base.View.Main
 
         public string Get()
         {
-            if (string.IsNullOrEmpty(Name) || string.IsNullOrWhiteSpace(Name)) return default;
+            if (string.IsNullOrEmpty(Name) || string.IsNullOrWhiteSpace(Name))
+                return default;
 
             PatterTableName = Name;
 
@@ -57,6 +58,7 @@ namespace Persistence.Controllers.Base.View.Main
 
             string fKColumnName = string.Empty;
             string joinColumnName = string.Empty;
+            string patternTableName = string.Empty;
 
             bool isLeftJoin = false;
 
@@ -65,6 +67,7 @@ namespace Persistence.Controllers.Base.View.Main
                 if (property.GetCustomAttribute<Fk>() != null)
                 {
                     fKColumnName = property.GetCustomAttribute<ColumnAttribute>().Name;
+                    patternTableName = property.GetCustomAttribute<Fk>().TableName;
                     joinColumnName = property.GetCustomAttribute<Fk>().ColumnName;
                 }
 
@@ -72,16 +75,17 @@ namespace Persistence.Controllers.Base.View.Main
                 {
                     isLeftJoin = property.GetCustomAttribute<JoinType>().Type == Models.JoinType.LEFT;
                     SetJoin(property.GetValue(Activator.CreateInstance<T>()), property.GetCustomAttribute<JoinType>() == null ? Models.JoinType.INNER :
-                                              isLeftJoin ? Models.JoinType.LEFT : property.GetCustomAttribute<JoinType>().Type, Name, joinColumnName,
-                                              property.GetCustomAttribute<ColumnAttribute>().Name, ref sqlParams, ref sqlQueries, ref sqlJoins, default, isLeftJoin);
+                            isLeftJoin ? Models.JoinType.LEFT : property.GetCustomAttribute<JoinType>().Type, Name, joinColumnName,
+                            property.GetCustomAttribute<JoinType>().FkName, ref sqlParams, ref sqlQueries, ref sqlJoins, default, isLeftJoin);
                     continue;
                 }
 
-                string columnName = property.GetCustomAttribute<ColumnAttribute>() == null ? null : property.GetCustomAttribute<ColumnAttribute>().Name;
-                if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName)) continue;
+                string columnName = property.GetCustomAttribute<ColumnAttribute>()?.Name;
+                if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName))
+                    continue;
 
-                SetSqlParam(Name, columnName, ref sqlParams);
-                SetSqlQuery(Name, columnName, ref sqlQueries);
+                SetSqlParam(Name, columnName, default, ref sqlParams);
+                SetSqlQuery(Name, default, columnName, ref sqlQueries);
             }
 
             Utils.RemoveLastComma(ref sqlParams);
@@ -103,8 +107,11 @@ namespace Persistence.Controllers.Base.View.Main
             int count = 0;
             foreach (string join in sqlJoins)
             {
-                if (join.Split(" ".ToCharArray())[2].Equals(joinTableName)) ++count;
-                if (count == 2) return true;
+                if (join.Split(" ".ToCharArray())[2].Equals(joinTableName))
+                    ++count;
+
+                if (count == 2)
+                    return true;
             }
 
             return false;
@@ -112,7 +119,7 @@ namespace Persistence.Controllers.Base.View.Main
 
         private void SetJoin(object child, Models.JoinType type, string tableName, string joinColumnName,
                              string fkColumnName, ref List<string> sqlParams, ref List<string> sqlQueries,
-                             ref List<string> sqlJoins, string patternTable = default, bool isPatternLeftJoin = false)
+                             ref List<string> sqlJoins, string patternTableName = default, bool isPatternLeftJoin = false)
         {
             string joinTableName = child.GetType().GetCustomAttribute<TableAttribute>().Name;
             string alias = $"{tableName}__{fkColumnName}";
@@ -120,14 +127,17 @@ namespace Persistence.Controllers.Base.View.Main
 
             string join = $"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {tableName}.{fkColumnName}) ";
 
-            if (sqlJoins.Count <= 0) sqlJoins.Add(join);
+            if (sqlJoins.Count <= 0)
+                sqlJoins.Add(join);
             else
             {
                 ++IndexAlias;
                 string paternAlias = Aliases[IndexAlias - 1].Value;
 
-                if (alias.Split("__".ToCharArray())[0].Equals(PatterTableName)) sqlJoins.Add(join);
-                else sqlJoins.Add($"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {paternAlias}.{fkColumnName}) ");
+                if (alias.Split("__".ToCharArray())[0].Equals(PatterTableName))
+                    sqlJoins.Add(join);
+                else
+                    sqlJoins.Add($"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {paternAlias}.{fkColumnName}) ");
             }
 
             RedundantJoin = IsRedundantJoin(sqlJoins, joinTableName);
@@ -137,19 +147,17 @@ namespace Persistence.Controllers.Base.View.Main
                 {
                     SetJoin(property.GetValue(child), property.GetCustomAttribute<JoinType>() == null ? Models.JoinType.INNER :
                             isPatternLeftJoin ? Models.JoinType.LEFT : property.GetCustomAttribute<JoinType>().Type,
-                            joinTableName, joinColumnName, property.GetCustomAttribute<ColumnAttribute>().Name,
+                            joinTableName, joinColumnName, property.GetCustomAttribute<JoinType>().FkName,
                             ref sqlParams, ref sqlQueries, ref sqlJoins,
-                            property.GetCustomAttribute<JoinType>() == null ? default :
                             property.GetCustomAttribute<JoinType>().PatternTableName, isPatternLeftJoin);
                     continue;
                 }
 
                 string columnName = property.GetCustomAttribute<ColumnAttribute>()?.Name;
-
                 if (RedundantJoin)
                 {
                     RedundantJoin = false;
-                    if (patternTable == default)
+                    if (patternTableName == default)
                     {
                         string redundantColumnName = sqlJoins.Where(x => x.Split('(').First().Contains(joinTableName) &&
                                                                          x.Split('(').First().Contains(tableName)).ToList().First().Split("__".ToCharArray()).First().Split("as ".ToCharArray())[1];
@@ -162,20 +170,25 @@ namespace Persistence.Controllers.Base.View.Main
 
                         joinTableName = $"{tableName}__{joinTableName}";
                     }
-
-                    patternTable = default;
                 }
 
-                if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName)) continue;
+                if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName))
+                    continue;
 
-                SetSqlParam(joinTableName, columnName, ref sqlParams);
-                SetSqlQuery(joinTableName, columnName, ref sqlQueries);
+                SetSqlParam(joinTableName, columnName, patternTableName, ref sqlParams);
+                SetSqlQuery(joinTableName, patternTableName, columnName, ref sqlQueries);
             }
         }
 
-        private void SetSqlParam(string tableName, string columnName, ref List<string> sqlParams) => sqlParams.Add($"{tableName}__{columnName},");
+        private void SetSqlParam(string tableName, string columnName, string patternTableName, ref List<string> sqlParams)
+        {
+            if (!(string.IsNullOrEmpty(patternTableName) || string.IsNullOrWhiteSpace(patternTableName)))
+                sqlParams.Add($"{patternTableName}__{tableName}__{columnName},");
+            else
+                sqlParams.Add($"{tableName}__{columnName},");
+        }
 
-        private void SetSqlQuery(string tableName, string columnName, ref List<string> sql)
+        private void SetSqlQuery(string tableName, string patternTable, string columnName, ref List<string> sql)
         {
             if (tableName.Equals(PatterTableName))
             {
@@ -183,10 +196,16 @@ namespace Persistence.Controllers.Base.View.Main
                 return;
             }
 
-            List<KeyValuePair<string, string>> objs = Aliases.Where(x => x.Key == (tableName.Split("__".ToCharArray()).Length == 1 ? tableName : tableName.Split("__".ToCharArray())[1])).ToList();
-            if (objs.Count > 1) objs = objs.Where(x => x.Value.Split("__".ToCharArray()).First().Equals(tableName.Split("__".ToCharArray()).First())).ToList();
+            string[] aux = tableName.Split("__".ToCharArray());
+            List<KeyValuePair<string, string>> objs = Aliases.Where(x => x.Key == (aux.Length == 1 ? tableName : aux[1])).ToList();
 
-            sql.Add($"{objs[0].Value}.{columnName},");
+            if (objs.Count > 1)
+                objs = objs.Where(x => x.Value.Split("__".ToCharArray()).First().Equals(patternTable)).ToList();
+
+            if (objs.Count <= 0)
+                return;
+
+            sql.Add($"{objs?.First().Value}.{columnName},");
         }
     }
 }

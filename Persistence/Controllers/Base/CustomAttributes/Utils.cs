@@ -18,7 +18,8 @@ namespace Persistence.Controllers.Base.CustomAttributes
         internal static bool IsBaseModel(Type type)
         {
             if (type.BaseType == null ||
-               (!MODEL_NAME.Equals(type.Name))) return false;
+               (!MODEL_NAME.Equals(type.Name))) 
+                return false;
 
             return true;
         }

@@ -36,7 +36,7 @@ namespace Persistence.Controllers.Base.Queries.Exp.Base
                 memberExpression = ((MemberExpression)((MemberExpression)obj).Expression);
                 if (memberExpression != null)
                 {
-                    tableName = memberExpression.Type.GetCustomAttribute<TableAttribute>().Name;
+                    SetTableName(memberExpression, memberExpression.Type.GetCustomAttribute<TableAttribute>().Name, ref tableName);
                     columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>().Name;
                 }
             }
@@ -47,6 +47,26 @@ namespace Persistence.Controllers.Base.Queries.Exp.Base
             }
 
             return $"{tableName}__{columnName}";
+        }
+
+        private void SetTableName(MemberExpression memberExpression, string lastTableName, ref string tableName)
+        {
+            Expression exp = default;
+            try
+            {
+                exp = ((MemberExpression)memberExpression.Expression);
+                string aux = exp.Type.GetCustomAttribute<TableAttribute>().Name;
+
+                if (tableName == default)
+                    tableName += $"{aux}__{lastTableName}";
+                else
+                    tableName = default;
+            }
+            catch
+            {
+                if (tableName == default)
+                    tableName = memberExpression.Type.GetCustomAttribute<TableAttribute>().Name;
+            }
         }
 
         private dynamic GetObjCastRight(Expression obj)

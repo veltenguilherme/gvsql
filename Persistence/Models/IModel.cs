@@ -20,6 +20,7 @@ namespace Persistence.Models
         DATE,
         DATE_NOT_NULL,
         INTEGER,
+        INTEGER_NOT_NULL,
         BIG_INT,
         NUMERIC_DEFAULT_VALUE_0,
         BOOLEAN,

@@ -13,7 +13,8 @@ namespace Persistence.Controllers
     {
         public async Task<T> UpdateOrInsertAsync(T obj)
         {
-            if (obj == null) throw new ArgumentNullException();
+            if (obj == null)
+                throw new ArgumentNullException();
 
             Guid guid = default;
             string value = string.Empty;
@@ -22,28 +23,31 @@ namespace Persistence.Controllers
             {
                 if (property.GetCustomAttribute<KeyAttribute>() != null)
                 {
-                    if (property.GetValue(obj) == null) return await InsertAsync(obj);
+                    if (property.GetValue(obj) == null)
+                        return await InsertAsync(obj);
+
                     guid = (Guid)property.GetValue(obj);
                     continue;
                 }
 
-                if (Utils.IsBaseModel(property.PropertyType.BaseType)) continue;
-                if (IsDefaultValue(property, obj)) continue;
-                if (SetValue(property, obj, ref value, "inserted")) continue;
-                if (SetValue(property, obj, ref value, "updated")) continue;
-                if (property.GetCustomAttribute<ColumnAttribute>() == null) continue;
+                if (Utils.IsBaseModel(property.PropertyType.BaseType) ||
+                    IsDefaultValue(property, obj) ||
+                    SetValue(property, obj, ref value, "inserted") ||
+                    SetValue(property, obj, ref value, "updated") ||
+                    property.GetCustomAttribute<ColumnAttribute>() == null)
+                    continue;
 
                 SetValue(ref value, property.GetCustomAttribute<ColumnAttribute>().Name, property, obj);
             }
 
-            string sql = $"UPDATE public.{Name} SET {value.Remove(value.Length - 1)} WHERE uuid = '{guid}' returning uuid";
-            return await ToListAsync(await Provider.ExecuteScalarAsync(sql));
+            return await ToListAsync(await Provider.ExecuteScalarAsync($"UPDATE public.{Name} SET {value.Remove(value.Length - 1)} WHERE uuid = '{guid}' returning uuid"));
         }
 
         private bool SetValue(PropertyInfo property, T obj, ref string value, string columnAttributeName)
         {
-            if (property.GetCustomAttribute<ColumnAttribute>() == null) return false;
-            if (!property.GetCustomAttribute<ColumnAttribute>().Name.Contains(columnAttributeName)) return false;
+            if (property.GetCustomAttribute<ColumnAttribute>() == null ||
+                !property.GetCustomAttribute<ColumnAttribute>().Name.Contains(columnAttributeName))
+                return false;
 
             SetValue(ref value, columnAttributeName, property, obj);
             return true;
@@ -52,7 +56,55 @@ namespace Persistence.Controllers
         private void SetValue(ref string value, string columnAttributeName, PropertyInfo property, T obj)
         {
             value += $"{columnAttributeName} = @{columnAttributeName},";
-            Provider.Parameters.Add(new NpgsqlParameter(columnAttributeName, property.GetValue(obj)));
+            Provider.Parameters.Add(new NpgsqlParameter(columnAttributeName, GetValue(obj, property)));
+        }
+
+        public static string GetDataType(Models.DataType type)
+        {
+            switch (type)
+            {
+                case Models.DataType.TEXT_NOT_NULL: return "text NOT NULL";
+                case Models.DataType.TEXT_NOT_NULL_UNIQUE: return "text NOT NULL UNIQUE";
+                case Models.DataType.TEXT: return "text";
+                case Models.DataType.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL: return "timestamp without time zone NOT NULL";
+                case Models.DataType.TIMESTAMP_WITHOUT_TIME_ZONE: return "timestamp without time zone";
+                case Models.DataType.DATE: return "date";
+                case Models.DataType.DATE_NOT_NULL: return "date NOT NULL";
+                case Models.DataType.INTEGER: return "integer";
+                case Models.DataType.INTEGER_NOT_NULL: return "integer NOT NULL";
+                case Models.DataType.BIG_INT: return "bigint";
+                case Models.DataType.NUMERIC_DEFAULT_VALUE_0: return "numeric DEFAULT 0.00";
+                case Models.DataType.BOOLEAN: return "boolean";
+                case Models.DataType.BYTEA: return "bytea";
+                case Models.DataType.BYTEA_NOT_NULL: return "bytea NOT NULL";
+                case Models.DataType.GUID: return "uuid";
+                case Models.DataType.DEFAULT:
+                default: return default;
+            }
+        }
+
+        internal static object GetDefaultValue(string type)
+        {
+            switch (type)
+            {
+                case "text":
+                case "integer":
+                case "bigint":
+                case "numeric":
+                case "bytea":
+                default:
+                    return 0;
+
+                case "boolean":
+                    return false;
+
+                case "uuid":
+                    return Guid.NewGuid();
+
+                case "date":
+                case "timestamp":
+                    return DateTime.MinValue;
+            }
         }
     }
 }

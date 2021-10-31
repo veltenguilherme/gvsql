@@ -26,12 +26,14 @@ namespace Persistence.Controllers.Base
 
         private async Task<NpgsqlCommand> GetCommand(string sql)
         {
-            if (string.IsNullOrEmpty(sql)) throw new ArgumentNullException();
+            if (string.IsNullOrEmpty(sql))
+                throw new ArgumentNullException();
 
             Conn = new NpgsqlConnection(GetConnectionString(Database.HostName, Database.Port, Database.UserName, Database.Password, Database.Name));
             await Conn.OpenAsync();
 
-            if (Parameters == null || Parameters.Count <= 0) return new NpgsqlCommand(sql, Conn, Conn.BeginTransaction());
+            if (Parameters == null || Parameters.Count <= 0)
+                return new NpgsqlCommand(sql, Conn, Conn.BeginTransaction());
 
             NpgsqlCommand npgsqlCommand = new NpgsqlCommand(sql, Conn, Conn.BeginTransaction());
             Parameters.ForEach(x => npgsqlCommand.Parameters.AddWithValue(x.ParameterName, x.Value ?? DBNull.Value));
@@ -68,15 +70,16 @@ namespace Persistence.Controllers.Base
 
         internal async Task<int> ExecuteNonQueryAsync(string sql)
         {
+            if (!Database.Exists)
+                return default;
+
             int result = default;
 
             try
             {
                 var command = await GetCommand(sql);
                 if (command == null)
-                {
                     return result;
-                }
 
                 result = await command.ExecuteNonQueryAsync();
                 await command?.Transaction?.CommitAsync();
@@ -96,15 +99,16 @@ namespace Persistence.Controllers.Base
 
         internal async Task<object> ExecuteScalarAsync(string sql)
         {
+            if (!Database.Exists)
+                return default;
+
             object result = default;
 
             try
             {
                 var command = await GetCommand(sql);
                 if (command == null)
-                {
                     return result;
-                }
 
                 result = await command.ExecuteScalarAsync();
                 await command?.Transaction?.CommitAsync();
@@ -125,6 +129,9 @@ namespace Persistence.Controllers.Base
 
         internal object ExecuteScalar(string sql)
         {
+            if (!Database.Exists)
+                return default;
+
             object result = default;
             NpgsqlConnection npgsqlConnection = new NpgsqlConnection(GetConnectionString(Database.HostName, Database.Port, Database.UserName, Database.Password, Database.Name));
 
@@ -133,10 +140,12 @@ namespace Persistence.Controllers.Base
                 npgsqlConnection.Open();
 
                 NpgsqlCommand npgsqlCommand = new NpgsqlCommand(sql, npgsqlConnection, npgsqlConnection.BeginTransaction());
-                if (Parameters != null && Parameters.Count > 0) Parameters.ForEach(x => npgsqlCommand.Parameters.AddWithValue(x.ParameterName, x.Value ?? DBNull.Value));
+                if (Parameters != null && Parameters.Count > 0)
+                    Parameters.ForEach(x => npgsqlCommand.Parameters.AddWithValue(x.ParameterName, x.Value ?? DBNull.Value));
 
                 var command = npgsqlCommand;
-                if (command == null) return result;
+                if (command == null)
+                    return result;
 
                 result = command.ExecuteScalar();
                 command?.Transaction?.Commit();
@@ -157,18 +166,25 @@ namespace Persistence.Controllers.Base
 
         internal async Task<List<T>> ExecuteReaderAsync(string sql)
         {
+            if (!Database.Exists)
+                return default;
+
             List<T> collection = Activator.CreateInstance<List<T>>();
 
             try
             {
                 var command = await GetCommand(sql);
-                if (command == null) return collection;
+                if (command == null)
+                    return collection;
 
-                foreach (DbDataRecord dbDataRecord in await command.ExecuteReaderAsync())
+                foreach (DbDataRecord record in await command.ExecuteReaderAsync())
                 {
-                    T domain = Deserialize(dbDataRecord);
-                    if (domain == null) continue;
-                    if (collection == null) collection = new List<T>();
+                    T domain = Deserialize(record);
+                    if (domain == null)
+                        continue;
+
+                    if (collection == null)
+                        collection = new List<T>();
 
                     collection.Add(domain);
                 }
@@ -188,6 +204,9 @@ namespace Persistence.Controllers.Base
 
         internal List<T> ExecuteReader(string sql)
         {
+            if (!Database.Exists)
+                return default;
+
             List<T> collection = Activator.CreateInstance<List<T>>();
             NpgsqlConnection npgsqlConnection = new NpgsqlConnection(GetConnectionString(Database.HostName, Database.Port, Database.UserName, Database.Password, Database.Name));
 
@@ -197,19 +216,20 @@ namespace Persistence.Controllers.Base
 
                 NpgsqlCommand npgsqlCommand = new NpgsqlCommand(sql, npgsqlConnection, npgsqlConnection.BeginTransaction());
                 if (Parameters != null && Parameters.Count > 0)
-                {
                     Parameters.ForEach(x => npgsqlCommand.Parameters.AddWithValue(x.ParameterName, x.Value ?? DBNull.Value));
-                }
+
                 var command = npgsqlCommand;
                 if (command == null)
-                {
                     return collection;
-                }
+
                 foreach (DbDataRecord dbDataRecord in command.ExecuteReader())
                 {
                     T domain = Deserialize(dbDataRecord);
-                    if (domain == null) continue;
-                    if (collection == null) collection = new List<T>();
+                    if (domain == null)
+                        continue;
+
+                    if (collection == null)
+                        collection = new List<T>();
 
                     collection.Add(domain);
                 }
@@ -228,46 +248,51 @@ namespace Persistence.Controllers.Base
             return collection;
         }
 
-        private T Deserialize(DbDataRecord data)
+        private T Deserialize(DbDataRecord record)
         {
             T target = Activator.CreateInstance<T>();
-            if (data == null || data == default(DbDataRecord)) return target;
+            if (record == null || record == default(DbDataRecord))
+                return target;
 
-            Collection deserialization = new Collection(data);
-            if (deserialization == null || deserialization.Count < 1) return target;
+            Collection deserialization = new Collection(record);
+            if (deserialization == null || deserialization.Count < 1)
+                return target;
 
             foreach (PropertyInfo property in typeof(T).GetProperties())
-            {
                 Deserialize(deserialization, property, target);
-            }
 
             return target;
         }
 
         private void Deserialize(Collection deserialization, PropertyInfo property, object target, string patternTableName = null)
         {
-            if (property.GetMethod == default) return;
+            if (property.GetMethod == default)
+                return;
 
             if (Utils.IsBaseModel(property.PropertyType.BaseType))
             {
-                patternTableName = property.GetCustomAttribute<JoinType>() == null ? default : property.GetCustomAttribute<JoinType>().PatternTableName;
+                patternTableName = property.GetCustomAttribute<JoinType>()?.PatternTableName;
                 DeserializeChild(deserialization, property, property.GetValue(target), target, patternTableName);
                 return;
             }
 
-            if (property.GetCustomAttribute<ColumnAttribute>() == null) return;
+            if (property.GetCustomAttribute<ColumnAttribute>() == null)
+                return;
 
             string columnName = property.GetCustomAttribute<ColumnAttribute>().Name;
-            if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName)) return;
-            string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;
+            if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName))
+                return;
 
+            string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;
             Model model = deserialization.Find(x => x.ColumnName == string.Format($"{(patternTableName == null ? tableName : $"{patternTableName}__{tableName}")}__{columnName}"));
-            if (model == null) model = deserialization.Find(x => x.ColumnName == $"{tableName}__{columnName}");
+            if (model == null)
+                model = deserialization.Find(x => x.ColumnName == $"{tableName}__{columnName}");
 
             patternTableName = null;
 
-            if (model == null) return;
-            if (property.SetMethod == default) return;
+            if (model == null ||
+                property.SetMethod == default)
+                return;
 
             property.SetValue(target, model.Value == DBNull.Value ? null : model.Value);
         }
@@ -275,9 +300,7 @@ namespace Persistence.Controllers.Base
         private void DeserializeChild(Collection deserializationCollection, PropertyInfo property, object child, object target, string patterTableName = default)
         {
             foreach (PropertyInfo childProperty in child.GetType().GetProperties())
-            {
                 Deserialize(deserializationCollection, childProperty, child, patterTableName);
-            }
 
             property.SetValue(target, child);
         }

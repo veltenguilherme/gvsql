@@ -10,19 +10,23 @@ namespace Persistence.Controllers
 {
     public abstract partial class Table<T> : Controller<T>
     {
-        public Table() : base()
+        public Table(bool create, bool dropAndCreateView) : base()
         {
-            if (!Database.Exists)
+            if (create)
             {
                 Provider.ExecuteNonQueryAsync(new Base.Table.Create().Set<T>(Name)).Wait();
                 new Base.Trigger.UpdateOrInsert.Create<T>();
                 new View<T>();
             }
+            else
+            if (dropAndCreateView)
+                new View<T>(true);
         }
 
         internal async Task<T> ToListAsync(object info)
         {
-            if (info == null) return default;
+            if (info == null)
+                return default;
 
             string sql = $"select * from view_{Name} where {Name}__uuid = '{(Guid)info}'";
             var objs = await Provider.ExecuteReaderAsync(sql);
@@ -30,13 +34,9 @@ namespace Persistence.Controllers
             return objs[0];
         }
 
-        public async Task<List<T>> ToListAsync(Query<T> query, bool exception = true)
+        public async Task<List<T>> ToListAsync(Query<T> query)
         {
-            var result = await new View<T>().ToListAsync(query);
-            if (result.Count <= 0 && exception)
-                throw new Exception("Nenhum registro foi encontrado.");
-
-            return result;
+            return await new View<T>().ToListAsync(query);
         }
 
         public async Task<List<T>> ToListAsync()
@@ -44,23 +44,21 @@ namespace Persistence.Controllers
             return await new View<T>().ToListAsync();
         }
 
-        public async Task<List<T>> ToListAsync(string sql, bool exception = true)
+        public async Task<List<T>> ToListAsync(string sql)
         {
-            var result = await new View<T>().ToListAsync(sql);
-            if (result.Count <= 0 && exception)
-                throw new Exception("Nenhum registro foi encontrado.");
-
-            return result;
+            return await new View<T>().ToListAsync(sql);
         }
 
         public async Task<List<T>> UpdateOrInsertAsync(List<T> objs)
         {
-            if (objs == null || objs.Count <= 0) throw new ArgumentNullException();
+            if (objs == null || objs.Count <= 0)
+                throw new ArgumentNullException();
 
-            foreach (T obj in objs)
+            foreach (var x in objs)
             {
-                T aux = await UpdateOrInsertAsync(obj);
-                if (aux != null) Add(aux);
+                T aux = await UpdateOrInsertAsync(x);
+                if (aux != null)
+                    Add(aux);
             }
 
             return this;
@@ -68,12 +66,14 @@ namespace Persistence.Controllers
 
         public async Task<List<T>> RemoveAsync(List<T> objs)
         {
-            if (objs == null || objs.Count <= 0) throw new ArgumentNullException();
+            if (objs == null || objs.Count <= 0)
+                throw new ArgumentNullException();
 
-            foreach (T obj in objs)
+            foreach (var x in objs)
             {
-                int result = await RemoveAsync(obj);
-                if (result > 0) Add(obj);
+                int result = await RemoveAsync(x);
+                if (result > 0)
+                    Add(x);
             }
 
             return this;
@@ -81,7 +81,8 @@ namespace Persistence.Controllers
 
         public async Task<int> RemoveAsync(T obj)
         {
-            if (obj == null) throw new ArgumentNullException();
+            if (obj == null)
+                throw new ArgumentNullException();
 
             Guid? uuid = null;
 

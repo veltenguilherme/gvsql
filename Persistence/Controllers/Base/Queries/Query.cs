@@ -65,10 +65,14 @@ namespace Persistence.Controllers.Base.Queries
                     value = BinaryRightExpressions.Single(x => x.Index == i).Obj;
                     logicOperator = GetExpressionType(ExpressionsType.Single(x => x.Index == i).Type);
                 }
-                catch { continue; }
+                catch
+                {
+                    continue;
+                }
 
                 Sql += GetSqlWhere(columnName, logicOperator, value);
-                if (IsMainIndex(mainIndexes, i, ref mainIndex)) Sql += $" {GetExpressionType(ExpressionsType.Single(x => x.Index == mainIndex).Type)} ";
+                if (IsMainIndex(mainIndexes, i, ref mainIndex))
+                    Sql += $" {GetExpressionType(ExpressionsType.Single(x => x.Index == mainIndex).Type)} ";
             }
         }
 
@@ -88,7 +92,9 @@ namespace Persistence.Controllers.Base.Queries
 
         private void SetLstMainIndex(ExpressionTypeIndex<T> expressionTypeIndex, ref List<int> mainIndexes)
         {
-            if (BinaryRightExpressions.Where(x => x.Index == expressionTypeIndex.Index).ToList().Count > 0) return;
+            if (BinaryRightExpressions.Where(x => x.Index == expressionTypeIndex.Index).ToList().Count > 0)
+                return;
+
             mainIndexes.Add(expressionTypeIndex.Index);
         }
 

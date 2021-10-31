@@ -10,7 +10,8 @@ namespace Persistence.Controllers.Base.Table
     {
         public string Set<T>(string tableName)
         {
-            if (string.IsNullOrEmpty(tableName) || string.IsNullOrWhiteSpace(tableName)) return default;
+            if (string.IsNullOrEmpty(tableName) || string.IsNullOrWhiteSpace(tableName))
+                return default;
 
             string sqlBase = Resource.tbl_create.Trim().Replace("{0}", tableName);
             List<string> sqlQueries = new List<string>();
@@ -24,7 +25,9 @@ namespace Persistence.Controllers.Base.Table
                 DataType dataType = property.GetCustomAttribute<CustomAttributes.TypeInfo>() == null ? DataType.DEFAULT : property.GetCustomAttribute<CustomAttributes.TypeInfo>().Type;
                 FkType fkType = property.GetCustomAttribute<Fk>() == null ? FkType.DEFAULT : property.GetCustomAttribute<Fk>().Type;
 
-                if (SetForeignKey(fkType, dataType, columnName, fkColumnName, fkTableName, ref sqlQueries)) continue;
+                if (SetForeignKey(fkType, dataType, columnName, fkColumnName, fkTableName, ref sqlQueries)) 
+                    continue;
+
                 SetDataType(dataType, columnName, ref sqlQueries);
             }
 
@@ -69,6 +72,7 @@ namespace Persistence.Controllers.Base.Table
                 case DataType.DATE: sql.Add($"{columName} date,"); return;
                 case DataType.DATE_NOT_NULL: sql.Add($"{columName} date NOT NULL,"); return;
                 case DataType.INTEGER: sql.Add($"{columName} integer,"); return;
+                case DataType.INTEGER_NOT_NULL: sql.Add($"{columName} integer NOT NULL,"); return;
                 case DataType.BIG_INT: sql.Add($"{columName} bigint,"); return;
                 case DataType.NUMERIC_DEFAULT_VALUE_0: sql.Add($"{columName} numeric DEFAULT 0.00,"); return;
                 case DataType.BOOLEAN: sql.Add($"{columName} boolean,"); return;

@@ -7,10 +7,12 @@ namespace Persistence.Controllers.Base.CustomAttributes
     public class TypeInfo : Attribute
     {
         internal DataType Type { get; set; }
+        internal object Value { get; set; }
 
-        public TypeInfo(DataType type)
+        public TypeInfo(DataType type, object value = default)
         {
             Type = type;
+            Value = value;
         }
     }
 }

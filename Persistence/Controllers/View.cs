@@ -29,14 +29,19 @@ namespace Persistence.Controllers
             }
         }
 
-        public View()
+        public View(bool drop = false)
         {
-            if (!Database.Exists) new Create<T>(Name, Alias);
+            if (drop)
+                Provider.ExecuteScalar($"drop view if exists view_{Alias ?? Name}");
+
+            new Create<T>(Name, Alias);
         }
 
         public async virtual Task<List<T>> ToListAsync(string sql)
         {
-            if (string.IsNullOrEmpty(sql)) throw new ArgumentNullException();
+            if (string.IsNullOrEmpty(sql))
+                throw new ArgumentNullException();
+
             return await Provider.ExecuteReaderAsync(sql);
         }
 

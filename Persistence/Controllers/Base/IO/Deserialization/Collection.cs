@@ -13,19 +13,17 @@ namespace Persistence.Controllers.Base.IO.Deserialization
             if (data == null || data == default) return;
 
             for (int i = 0; i < data.FieldCount; i++)
-            {
                 this.Add(Get(i, data.GetName(i), data.GetValue(i), data.GetFieldType(i)));
-            }
         }
 
-        private Model Get(int Index, string ColumnName, object Value, Type Type)
+        private Model Get(int index, string columnName, object value, Type type)
         {
             Model serialization = new Model()
             {
-                Index = Index,
-                ColumnName = ColumnName,
-                Value = Value,
-                Type = Type
+                Index = index,
+                ColumnName = columnName,
+                Value = value,
+                Type = type
             };
 
             return serialization;
