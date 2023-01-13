@@ -14,10 +14,10 @@ namespace Persistence.Models
 
         [Column("inserted")]
         [SqlType(SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL)]
-        public DateTime? Insert { get; set; }
+        public DateTime? Inserted { get; set; }
 
         [Column("updated")]
         [SqlType(SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE)]
-        public DateTime? Update { get; set; }
+        public DateTime? Updated { get; set; }
     }
 }

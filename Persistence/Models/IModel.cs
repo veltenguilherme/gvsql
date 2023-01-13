@@ -5,8 +5,8 @@ namespace Persistence.Models
     public interface IModel<T>
     {
         public Guid? Guid { get; set; }
-        public DateTime? Insert { get; set; }
-        public DateTime? Update { get; set; }
+        public DateTime? Inserted { get; set; }
+        public DateTime? Updated { get; set; }
     }
 
     public enum SqlTypes
