@@ -7,7 +7,7 @@ namespace Persistence.Models
 {
     public class Model<T> : IModel<T>
     {
-        [DefaultValue("00000000-0000-0000-0000-000000000000")] //swagger
+        [DefaultValue(null)] //swagger
         [System.ComponentModel.DataAnnotations.Key]
         [Column("uuid")]
         [SqlType(SqlTypes.GUID)]
