@@ -9,7 +9,7 @@ namespace Persistence.Models
         public DateTime? Update { get; set; }
     }
 
-    public enum DataType
+    public enum SqlTypes
     {
         GUID = 1,
         TEXT,
@@ -29,7 +29,7 @@ namespace Persistence.Models
         DEFAULT
     }
 
-    public enum FkType
+    public enum SqlFkTypes
     {
         ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION_NOT_NULL_UNIQUE = 1,
         ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION_NOT_NULL,
@@ -37,7 +37,7 @@ namespace Persistence.Models
         DEFAULT
     }
 
-    public enum JoinType
+    public enum SqlJoinTypes
     {
         INNER = 1,
         LEFT

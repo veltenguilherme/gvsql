@@ -49,7 +49,7 @@ namespace Persistence.Controllers.Base
 
             try
             {
-                var name = property.GetCustomAttribute<CustomAttributes.TypeInfo>().Type.ToString().ToUpper();
+                var name = property.GetCustomAttribute<CustomAttributes.SqlType>().Type.ToString().ToUpper();
             }
             catch
             {
@@ -60,7 +60,7 @@ namespace Persistence.Controllers.Base
             {
                 case "String":
                     return string.IsNullOrEmpty(Convert.ToString(property.GetValue(obj))) &&
-                           !"TEXT".Equals(property.GetCustomAttribute<CustomAttributes.TypeInfo>().Type.ToString().ToUpper());
+                           !"TEXT".Equals(property.GetCustomAttribute<CustomAttributes.SqlType>().Type.ToString().ToUpper());
 
                 case "Byte[]":
                     return property.GetValue(obj) == null;

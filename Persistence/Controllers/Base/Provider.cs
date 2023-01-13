@@ -271,7 +271,7 @@ namespace Persistence.Controllers.Base
 
             if (Utils.IsBaseModel(property.PropertyType.BaseType))
             {
-                patternTableName = property.GetCustomAttribute<JoinType>()?.PatternTableName;
+                patternTableName = property.GetCustomAttribute<SqlJoinType>()?.PatternTableName;
                 DeserializeChild(deserialization, property, property.GetValue(target), target, patternTableName);
                 return;
             }

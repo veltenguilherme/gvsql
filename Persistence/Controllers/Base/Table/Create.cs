@@ -19,11 +19,11 @@ namespace Persistence.Controllers.Base.Table
             foreach (PropertyInfo property in typeof(T).GetProperties())
             {
                 string columnName = property.GetCustomAttribute<ColumnAttribute>() == null ? null : property.GetCustomAttribute<ColumnAttribute>().Name;
-                string fkTableName = property.GetCustomAttribute<Fk>() == null ? null : property.GetCustomAttribute<Fk>().TableName;
-                string fkColumnName = property.GetCustomAttribute<Fk>() == null ? null : property.GetCustomAttribute<Fk>().ColumnName;
+                string fkTableName = property.GetCustomAttribute<SqlFk>() == null ? null : property.GetCustomAttribute<SqlFk>().TableName;
+                string fkColumnName = property.GetCustomAttribute<SqlFk>() == null ? null : property.GetCustomAttribute<SqlFk>().ColumnName;
 
-                DataType dataType = property.GetCustomAttribute<CustomAttributes.TypeInfo>() == null ? DataType.DEFAULT : property.GetCustomAttribute<CustomAttributes.TypeInfo>().Type;
-                FkType fkType = property.GetCustomAttribute<Fk>() == null ? FkType.DEFAULT : property.GetCustomAttribute<Fk>().Type;
+                SqlTypes dataType = property.GetCustomAttribute<CustomAttributes.SqlType>() == null ? SqlTypes.DEFAULT : property.GetCustomAttribute<CustomAttributes.SqlType>().Type;
+                SqlFkTypes fkType = property.GetCustomAttribute<SqlFk>() == null ? SqlFkTypes.DEFAULT : property.GetCustomAttribute<SqlFk>().Type;
 
                 if (SetForeignKey(fkType, dataType, columnName, fkColumnName, fkTableName, ref sqlQueries)) 
                     continue;
@@ -40,19 +40,19 @@ namespace Persistence.Controllers.Base.Table
             return sqlBase.Replace("{1}", sql);
         }
 
-        private bool SetForeignKey(FkType fkType, DataType dataType, string columnName, string fkColumnName, string fkTableName, ref List<string> sql)
+        private bool SetForeignKey(SqlFkTypes fkType, SqlTypes dataType, string columnName, string fkColumnName, string fkTableName, ref List<string> sql)
         {
             switch (fkType)
             {
-                case FkType.ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION_NOT_NULL_UNIQUE:
+                case SqlFkTypes.ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION_NOT_NULL_UNIQUE:
                     sql.Add($"{columnName} {GetFkDataType(dataType)} REFERENCES {fkTableName}({fkColumnName}) ON DELETE CASCADE ON UPDATE NO ACTION NOT NULL UNIQUE,");
                     return true;
 
-                case FkType.ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION_NOT_NULL:
+                case SqlFkTypes.ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION_NOT_NULL:
                     sql.Add($"{columnName} {GetFkDataType(dataType)} REFERENCES {fkTableName}({fkColumnName}) ON DELETE CASCADE ON UPDATE NO ACTION NOT NULL,");
                     return true;
 
-                case FkType.ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION:
+                case SqlFkTypes.ON_DELETE_CASCADE_ON_UPDATE_NO_ACTION:
                     sql.Add($"{columnName} {GetFkDataType(dataType)} REFERENCES {fkTableName}({fkColumnName}) ON DELETE CASCADE ON UPDATE NO ACTION,");
                     return true;
 
@@ -60,35 +60,35 @@ namespace Persistence.Controllers.Base.Table
             }
         }
 
-        private void SetDataType(DataType type, string columName, ref List<string> sql)
+        private void SetDataType(SqlTypes type, string columName, ref List<string> sql)
         {
             switch (type)
             {
-                case DataType.TEXT_NOT_NULL: sql.Add($"{columName} text NOT NULL,"); return;
-                case DataType.TEXT_NOT_NULL_UNIQUE: sql.Add($"{columName} text NOT NULL UNIQUE,"); return;
-                case DataType.TEXT: sql.Add($"{columName} text,"); return;
-                case DataType.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL: sql.Add($"{columName} timestamp without time zone NOT NULL,"); return;
-                case DataType.TIMESTAMP_WITHOUT_TIME_ZONE: sql.Add($"{columName} timestamp without time zone,"); return;
-                case DataType.DATE: sql.Add($"{columName} date,"); return;
-                case DataType.DATE_NOT_NULL: sql.Add($"{columName} date NOT NULL,"); return;
-                case DataType.INTEGER: sql.Add($"{columName} integer,"); return;
-                case DataType.INTEGER_NOT_NULL: sql.Add($"{columName} integer NOT NULL,"); return;
-                case DataType.BIG_INT: sql.Add($"{columName} bigint,"); return;
-                case DataType.NUMERIC_DEFAULT_VALUE_0: sql.Add($"{columName} numeric DEFAULT 0.00,"); return;
-                case DataType.BOOLEAN: sql.Add($"{columName} boolean,"); return;
-                case DataType.BYTEA: sql.Add($"{columName} bytea,"); return;
-                case DataType.BYTEA_NOT_NULL: sql.Add($"{columName} bytea NOT NULL,"); return;
-                case DataType.GUID:
-                case DataType.DEFAULT:
+                case SqlTypes.TEXT_NOT_NULL: sql.Add($"{columName} text NOT NULL,"); return;
+                case SqlTypes.TEXT_NOT_NULL_UNIQUE: sql.Add($"{columName} text NOT NULL UNIQUE,"); return;
+                case SqlTypes.TEXT: sql.Add($"{columName} text,"); return;
+                case SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL: sql.Add($"{columName} timestamp without time zone NOT NULL,"); return;
+                case SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE: sql.Add($"{columName} timestamp without time zone,"); return;
+                case SqlTypes.DATE: sql.Add($"{columName} date,"); return;
+                case SqlTypes.DATE_NOT_NULL: sql.Add($"{columName} date NOT NULL,"); return;
+                case SqlTypes.INTEGER: sql.Add($"{columName} integer,"); return;
+                case SqlTypes.INTEGER_NOT_NULL: sql.Add($"{columName} integer NOT NULL,"); return;
+                case SqlTypes.BIG_INT: sql.Add($"{columName} bigint,"); return;
+                case SqlTypes.NUMERIC_DEFAULT_VALUE_0: sql.Add($"{columName} numeric DEFAULT 0.00,"); return;
+                case SqlTypes.BOOLEAN: sql.Add($"{columName} boolean,"); return;
+                case SqlTypes.BYTEA: sql.Add($"{columName} bytea,"); return;
+                case SqlTypes.BYTEA_NOT_NULL: sql.Add($"{columName} bytea NOT NULL,"); return;
+                case SqlTypes.GUID:
+                case SqlTypes.DEFAULT:
                 default: return;
             }
         }
 
-        private string GetFkDataType(DataType dataType)
+        private string GetFkDataType(SqlTypes dataType)
         {
             switch (dataType)
             {
-                case DataType.GUID: return "uuid";
+                case SqlTypes.GUID: return "uuid";
                 default: return string.Empty;
             }
         }

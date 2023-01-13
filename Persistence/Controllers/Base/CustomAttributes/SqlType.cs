@@ -4,12 +4,12 @@ using System;
 namespace Persistence.Controllers.Base.CustomAttributes
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class TypeInfo : Attribute
+    public class SqlType : Attribute
     {
-        internal DataType Type { get; set; }
+        internal SqlTypes Type { get; set; }
         internal object Value { get; set; }
 
-        public TypeInfo(DataType type, object value = default)
+        public SqlType(SqlTypes type, object value = default)
         {
             Type = type;
             Value = value;

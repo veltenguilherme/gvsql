@@ -8,16 +8,16 @@ namespace Persistence.Models
     {
         [System.ComponentModel.DataAnnotations.Key]
         [Column("uuid")]
-        [TypeInfo(DataType.GUID)]
+        [SqlType(SqlTypes.GUID)]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid? Guid { get; set; }
 
         [Column("inserted")]
-        [TypeInfo(DataType.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL)]
+        [SqlType(SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL)]
         public DateTime? Insert { get; set; }
 
         [Column("updated")]
-        [TypeInfo(DataType.TIMESTAMP_WITHOUT_TIME_ZONE)]
+        [SqlType(SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE)]
         public DateTime? Update { get; set; }
     }
 }

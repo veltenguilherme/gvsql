@@ -18,16 +18,18 @@ namespace Persistence
         public static string Password { get; set; }
         public static string Name { get; set; }
 
-        public Database(string hostName, int port, string name, string userName, string password)
+        public Database(string hostName, int port, string name, string userName, string password, List<Structure> schema)
         {
             HostName = hostName;
             Port = port;
             UserName = userName;
             Password = password;
             Name = name;
+
+            Create(schema);
         }
 
-        public void Create(List<Structure> schema)
+        private void Create(List<Structure> schema)
         {
             try
             {
@@ -144,7 +146,7 @@ namespace Persistence
                 try
                 {
                     conn.Open();
-                    string tableName = model.GetType().GetCustomAttributesData().First().ConstructorArguments.First().Value.ToString();
+                    string tableName = model.GetType().GetCustomAttribute<TableAttribute>().Name;
 
                     foreach (PropertyInfo prop in model.GetType().GetProperties())
                     {
@@ -154,7 +156,7 @@ namespace Persistence
 
                         try
                         {
-                            type = Table<dynamic>.GetDataType(prop.GetCustomAttribute<Controllers.Base.CustomAttributes.TypeInfo>().Type);
+                            type = Table<dynamic>.GetDataType(prop.GetCustomAttribute<Controllers.Base.CustomAttributes.SqlType>().Type);
                             columnName = prop.GetCustomAttribute<ColumnAttribute>().Name;
 
                             command = $"ALTER TABLE {tableName} ADD COLUMN IF NOT EXISTS {columnName} {type}";
@@ -165,7 +167,7 @@ namespace Persistence
                             if (type != default && type.Contains("NOT NULL"))
                             {
                                 string typeWithoutNotNull = type.Split(' ').First();
-                                object defaultValue = prop.GetCustomAttribute<Controllers.Base.CustomAttributes.TypeInfo>().Value;
+                                object defaultValue = prop.GetCustomAttribute<Controllers.Base.CustomAttributes.SqlType>().Value;
                                 command = $"ALTER TABLE {tableName} ADD COLUMN IF NOT EXISTS {columnName} {typeWithoutNotNull}";
                                 new NpgsqlCommand(command, conn).ExecuteNonQuery();
 
@@ -204,11 +206,12 @@ namespace Persistence
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(GetConnectionString(Name)))
             {
-                conn.Open();
+                conn.Open();                
                 var tableName = new NpgsqlCommand($@"SELECT coalesce(table_name, ' ')
                                                        FROM information_schema.tables
                                                       WHERE table_schema = current_schema()
-                                                        AND table_name = '{Activator.CreateInstance(model).GetType().GetCustomAttributesData().First().ConstructorArguments.First().Value}'", conn).ExecuteScalar();
+                                                        AND table_name = '{Activator.CreateInstance(model).GetType().GetCustomAttribute<TableAttribute>().Name}'", conn).ExecuteScalar();
+                
                 conn.Close();
                 return !(tableName == null || string.IsNullOrEmpty(tableName.ToString()) || string.IsNullOrWhiteSpace(tableName.ToString()));
             }

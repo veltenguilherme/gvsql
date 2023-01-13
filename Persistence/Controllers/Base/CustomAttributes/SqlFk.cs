@@ -4,13 +4,13 @@ using System;
 namespace Persistence.Controllers.Base.CustomAttributes
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class Fk : Attribute
+    public class SqlFk : Attribute
     {
         internal string ColumnName { get; set; }
         internal string TableName { get; set; }
-        internal FkType Type { get; set; }
+        internal SqlFkTypes Type { get; set; }
 
-        public Fk(string tableName, string columnName, FkType type)
+        public SqlFk(string tableName, string columnName, SqlFkTypes type)
         {
             Type = type;
             TableName = tableName;

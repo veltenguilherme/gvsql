@@ -59,26 +59,26 @@ namespace Persistence.Controllers
             Provider.Parameters.Add(new NpgsqlParameter(columnAttributeName, GetValue(obj, property)));
         }
 
-        public static string GetDataType(Models.DataType type)
+        public static string GetDataType(Models.SqlTypes type)
         {
             switch (type)
             {
-                case Models.DataType.TEXT_NOT_NULL: return "text NOT NULL";
-                case Models.DataType.TEXT_NOT_NULL_UNIQUE: return "text NOT NULL UNIQUE";
-                case Models.DataType.TEXT: return "text";
-                case Models.DataType.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL: return "timestamp without time zone NOT NULL";
-                case Models.DataType.TIMESTAMP_WITHOUT_TIME_ZONE: return "timestamp without time zone";
-                case Models.DataType.DATE: return "date";
-                case Models.DataType.DATE_NOT_NULL: return "date NOT NULL";
-                case Models.DataType.INTEGER: return "integer";
-                case Models.DataType.INTEGER_NOT_NULL: return "integer NOT NULL";
-                case Models.DataType.BIG_INT: return "bigint";
-                case Models.DataType.NUMERIC_DEFAULT_VALUE_0: return "numeric DEFAULT 0.00";
-                case Models.DataType.BOOLEAN: return "boolean";
-                case Models.DataType.BYTEA: return "bytea";
-                case Models.DataType.BYTEA_NOT_NULL: return "bytea NOT NULL";
-                case Models.DataType.GUID: return "uuid";
-                case Models.DataType.DEFAULT:
+                case Models.SqlTypes.TEXT_NOT_NULL: return "text NOT NULL";
+                case Models.SqlTypes.TEXT_NOT_NULL_UNIQUE: return "text NOT NULL UNIQUE";
+                case Models.SqlTypes.TEXT: return "text";
+                case Models.SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL: return "timestamp without time zone NOT NULL";
+                case Models.SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE: return "timestamp without time zone";
+                case Models.SqlTypes.DATE: return "date";
+                case Models.SqlTypes.DATE_NOT_NULL: return "date NOT NULL";
+                case Models.SqlTypes.INTEGER: return "integer";
+                case Models.SqlTypes.INTEGER_NOT_NULL: return "integer NOT NULL";
+                case Models.SqlTypes.BIG_INT: return "bigint";
+                case Models.SqlTypes.NUMERIC_DEFAULT_VALUE_0: return "numeric DEFAULT 0.00";
+                case Models.SqlTypes.BOOLEAN: return "boolean";
+                case Models.SqlTypes.BYTEA: return "bytea";
+                case Models.SqlTypes.BYTEA_NOT_NULL: return "bytea NOT NULL";
+                case Models.SqlTypes.GUID: return "uuid";
+                case Models.SqlTypes.DEFAULT:
                 default: return default;
             }
         }
