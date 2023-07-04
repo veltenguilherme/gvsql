@@ -283,10 +283,10 @@ namespace Persistence.Controllers.Base
             if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName))
                 return;
 
-            string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;
-            Model model = deserialization.Find(x => x.ColumnName == string.Format($"{(patternTableName == null ? tableName : $"{patternTableName}__{tableName}")}__{columnName}"));
+            string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;            
+            Model model = deserialization.Find(x => x.ColumnName == string.Format($"{(patternTableName == null ? tableName : $"{patternTableName}çç{tableName}")}çç{columnName}"));
             if (model == null)
-                model = deserialization.Find(x => x.ColumnName == $"{tableName}__{columnName}");
+                model = deserialization.Find(x => x.ColumnName == $"{tableName}çç{columnName}");
 
             patternTableName = null;
 

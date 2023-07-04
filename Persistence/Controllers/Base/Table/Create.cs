@@ -1,5 +1,6 @@
 ﻿using Persistence.Controllers.Base.CustomAttributes;
 using Persistence.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
@@ -25,7 +26,7 @@ namespace Persistence.Controllers.Base.Table
                 SqlTypes dataType = property.GetCustomAttribute<CustomAttributes.SqlType>() == null ? SqlTypes.DEFAULT : property.GetCustomAttribute<CustomAttributes.SqlType>().Type;
                 SqlFkTypes fkType = property.GetCustomAttribute<SqlFk>() == null ? SqlFkTypes.DEFAULT : property.GetCustomAttribute<SqlFk>().Type;
 
-                if (SetForeignKey(fkType, dataType, columnName, fkColumnName, fkTableName, ref sqlQueries)) 
+                if (SetForeignKey(fkType, dataType, columnName, fkColumnName, fkTableName, ref sqlQueries))
                     continue;
 
                 SetDataType(dataType, columnName, ref sqlQueries);
@@ -91,6 +92,6 @@ namespace Persistence.Controllers.Base.Table
                 case SqlTypes.GUID: return "uuid";
                 default: return string.Empty;
             }
-        }
+        }        
     }
 }

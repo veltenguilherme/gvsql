@@ -46,7 +46,7 @@ namespace Persistence.Controllers.Base.Queries.Exp.Base
                 columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>().Name;
             }
 
-            return $"{tableName}__{columnName}";
+            return $"{tableName}{columnName}";
         }
 
         private void SetTableName(MemberExpression memberExpression, string lastTableName, ref string tableName)
@@ -58,7 +58,7 @@ namespace Persistence.Controllers.Base.Queries.Exp.Base
                 string aux = exp.Type.GetCustomAttribute<TableAttribute>().Name;
 
                 if (tableName == default)
-                    tableName += $"{aux}__{lastTableName}";
+                    tableName += $"{aux}çç{lastTableName}";
                 else
                     tableName = default;
             }

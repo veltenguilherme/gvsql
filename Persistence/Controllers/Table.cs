@@ -28,7 +28,7 @@ namespace Persistence.Controllers
             if (info == null)
                 return default;
 
-            string sql = $"select * from view_{Name} where {Name}__uuid = '{(Guid)info}'";
+            string sql = $"select * from view_{Name} where {Name}ççuuid = '{(Guid)info}'";
             var objs = await Provider.ExecuteReaderAsync(sql);
 
             return objs[0];

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 
 namespace Persistence.Controllers.Base.View.Main
-{
+{  
     internal class Create<T>
     {
         private List<KeyValuePair<string, string>> Aliases
@@ -21,7 +21,7 @@ namespace Persistence.Controllers.Base.View.Main
             set;
         } = 0;
 
-        private string PatterTableName
+        private string PatternTableName
         {
             get;
             set;
@@ -42,14 +42,14 @@ namespace Persistence.Controllers.Base.View.Main
             this.Name = name;
             this.Alias = alias;
             Provider.ExecuteNonQueryAsync(Get()).Wait();
-        }
+        }        
 
         public string Get()
         {
             if (string.IsNullOrEmpty(Name) || string.IsNullOrWhiteSpace(Name))
                 return default;
 
-            PatterTableName = Name;
+            PatternTableName = Name;
 
             string sqlBase = Resource.view_create.Trim().Replace("{0}", $"view_{Alias ?? Name}");
             List<string> sqlParams = new List<string>();
@@ -122,7 +122,7 @@ namespace Persistence.Controllers.Base.View.Main
                              ref List<string> sqlJoins, string patternTableName = default, bool isPatternLeftJoin = false)
         {
             string joinTableName = child.GetType().GetCustomAttribute<TableAttribute>().Name;
-            string alias = $"{tableName}__{fkColumnName}";
+            string alias = $"{tableName}çç{fkColumnName}";
             Aliases.Add(new KeyValuePair<string, string>(joinTableName, alias));
 
             string join = $"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {tableName}.{fkColumnName}) ";
@@ -132,9 +132,8 @@ namespace Persistence.Controllers.Base.View.Main
             else
             {
                 ++IndexAlias;
-                string paternAlias = Aliases[IndexAlias - 1].Value;
-
-                if (alias.Split("__".ToCharArray())[0].Equals(PatterTableName))
+                string paternAlias = Aliases[IndexAlias - 1].Value;                
+                if (alias.Split("çç".ToCharArray())[0].Equals(PatternTableName))
                     sqlJoins.Add(join);
                 else
                     sqlJoins.Add($"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {paternAlias}.{fkColumnName}) ");
@@ -160,15 +159,15 @@ namespace Persistence.Controllers.Base.View.Main
                     if (patternTableName == default)
                     {
                         string redundantColumnName = sqlJoins.Where(x => x.Split('(').First().Contains(joinTableName) &&
-                                                                         x.Split('(').First().Contains(tableName)).ToList().First().Split("__".ToCharArray()).First().Split("as ".ToCharArray())[1];
+                                                                         x.Split('(').First().Contains(tableName)).ToList().First().Split("çç".ToCharArray()).First().Split("as ".ToCharArray())[1];
 
                         for (int i = 0; i < sqlParams.Count; i++)
                         {
                             if (!sqlParams[i].Contains(joinTableName)) continue;
-                            sqlParams[i] = $"{redundantColumnName}__{sqlParams[i]}";
+                            sqlParams[i] = $"{redundantColumnName}çç{sqlParams[i]}";
                         }
 
-                        joinTableName = $"{tableName}__{joinTableName}";
+                        joinTableName = $"{tableName}çç{joinTableName}";
                     }
                 }
 
@@ -183,24 +182,24 @@ namespace Persistence.Controllers.Base.View.Main
         private void SetSqlParam(string tableName, string columnName, string patternTableName, ref List<string> sqlParams)
         {
             if (!(string.IsNullOrEmpty(patternTableName) || string.IsNullOrWhiteSpace(patternTableName)))
-                sqlParams.Add($"{patternTableName}__{tableName}__{columnName},");
+                sqlParams.Add($"{patternTableName}çç{tableName}çç{columnName},");
             else
-                sqlParams.Add($"{tableName}__{columnName},");
+                sqlParams.Add($"{tableName}çç{columnName},");
         }
 
         private void SetSqlQuery(string tableName, string patternTable, string columnName, ref List<string> sql)
         {
-            if (tableName.Equals(PatterTableName))
+            if (tableName.Equals(PatternTableName))
             {
                 sql.Add($"{tableName}.{columnName},");
                 return;
             }
 
-            string[] aux = tableName.Split("__".ToCharArray());
+            string[] aux = tableName.Split("çç".ToCharArray());
             List<KeyValuePair<string, string>> objs = Aliases.Where(x => x.Key == (aux.Length == 1 ? tableName : aux[1])).ToList();
 
             if (objs.Count > 1)
-                objs = objs.Where(x => x.Value.Split("__".ToCharArray()).First().Equals(patternTable)).ToList();
+                objs = objs.Where(x => x.Value.Split("çç".ToCharArray()).First().Equals(patternTable)).ToList();
 
             if (objs.Count <= 0)
                 return;
