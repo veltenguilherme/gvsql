@@ -46,7 +46,7 @@ namespace Persistence.Controllers.Base.Queries.Exp.Base
                 columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>().Name;
             }
 
-            return $"{tableName}{columnName}";
+            return $"{tableName}çç{columnName}";
         }
 
         private void SetTableName(MemberExpression memberExpression, string lastTableName, ref string tableName)

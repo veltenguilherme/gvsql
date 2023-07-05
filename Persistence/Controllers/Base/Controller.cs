@@ -86,6 +86,7 @@ namespace Persistence.Controllers.Base
 
             if (fullName.Contains("System.Nullable`1[[System.Int32") ||
                 fullName.Contains("System.Nullable`1[[System.Boolean") ||
+                fullName.Contains("System.Nullable`1[[System.String") ||
                 fullName.Contains("System.Nullable`1[[System.Decimal") ||
                 fullName.Contains("System.Nullable`1[[System.DateTime") ||
                 fullName.Contains("System.Nullable`1[[System.Guid"))
