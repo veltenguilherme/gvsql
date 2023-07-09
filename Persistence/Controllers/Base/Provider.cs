@@ -164,6 +164,14 @@ namespace Persistence.Controllers.Base
             return result;
         }
 
+        public async Task<NpgsqlDataReader> ExecuteReaderRawSqlAsync(string sql)
+        {
+            var command = await GetCommand(sql);
+            if (command == null) return default;
+
+            return await command.ExecuteReaderAsync();
+        }
+
         internal async Task<List<T>> ExecuteReaderAsync(string sql)
         {
             if (!Database.Exists)

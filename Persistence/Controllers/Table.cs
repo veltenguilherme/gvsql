@@ -3,6 +3,7 @@ using Persistence.Controllers.Base.Queries;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Common;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -34,14 +35,24 @@ namespace Persistence.Controllers
             return objs[0];
         }
 
-        public async Task<List<T>> ToListAsync(Query<T> query)
-        {
-            return await new View<T>().ToListAsync(query);
-        }
+        public async Task<List<T>> ToListAsync(Query<T> query) => await new View<T>().ToListAsync(query);
 
-        public async Task<List<T>> ToListAsync()
+        public async Task<List<T>> ToListAsync(int limit = 0, int offSet = 0) => await new View<T>().ToListAsync(limit, offSet);
+
+        public async Task<int> CountAsync()
         {
-            return await new View<T>().ToListAsync();
+            try
+            {
+                string sql = $"select count(*) from {Name}";
+                foreach (DbDataRecord record in await Provider.ExecuteReaderRawSqlAsync(sql))
+                    return Convert.ToInt32(record.GetValue(0));
+
+                return -1;
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
         }
 
         public async Task<List<T>> ToListAsync(string sql)

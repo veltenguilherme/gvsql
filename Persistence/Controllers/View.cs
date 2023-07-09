@@ -45,17 +45,26 @@ namespace Persistence.Controllers
             return await Provider.ExecuteReaderAsync(sql);
         }
 
-        public async virtual Task<List<T>> ToListAsync()
+        public async virtual Task<List<T>> ToListAsync(int limit = 0, int offSet = 0)
         {
-            return await Provider.ExecuteReaderAsync($"select * from view_{Alias ?? Name}");
+            var sql = $"select * from view_{Alias ?? Name} offset {offSet}";
+
+            if (limit > 0)
+                sql += $" limit {limit}";
+
+            return await Provider.ExecuteReaderAsync(sql);
         }
 
-        public async Task<List<T>> ToListAsync(Query<T> query)
+        public async Task<List<T>> ToListAsync(Query<T> query, int limit = 0, int offSet = 0)
         {
             Provider.Parameters.AddRange(query.NpgsqlParameters);
-            return await ToListAsync(GetQuery(query.Sql));
-        }
 
-        protected string GetQuery(string sql) => $"select * from view_{Alias ?? Name} {sql}";
+            var sql = $"select * from view_{Alias ?? Name} {query.Sql} offset {offSet}";
+
+            if (limit > 0)
+                sql += $"limit {limit}";
+
+            return await ToListAsync(sql);
+        }
     }
 }
