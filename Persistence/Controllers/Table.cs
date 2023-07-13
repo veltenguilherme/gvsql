@@ -53,6 +53,10 @@ namespace Persistence.Controllers
             {
                 return -1;
             }
+            finally
+            {
+                await Provider.Conn.DisposeAsync();
+            }
         }
 
         public async Task<List<T>> ToListAsync(string sql)

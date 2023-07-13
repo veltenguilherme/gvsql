@@ -12,7 +12,7 @@ namespace Persistence.Controllers.Base
 {
     public partial class Provider<T>
     {
-        private NpgsqlConnection Conn
+        internal NpgsqlConnection Conn
         {
             get;
             set;
@@ -164,7 +164,7 @@ namespace Persistence.Controllers.Base
             return result;
         }
 
-        public async Task<NpgsqlDataReader> ExecuteReaderRawSqlAsync(string sql)
+        internal async Task<NpgsqlDataReader> ExecuteReaderRawSqlAsync(string sql)
         {
             var command = await GetCommand(sql);
             if (command == null) return default;
@@ -196,6 +196,7 @@ namespace Persistence.Controllers.Base
 
                     collection.Add(domain);
                 }
+                
             }
             catch (Exception ex)
             {
@@ -291,7 +292,7 @@ namespace Persistence.Controllers.Base
             if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName))
                 return;
 
-            string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;            
+            string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;
             Model model = deserialization.Find(x => x.ColumnName == string.Format($"{(patternTableName == null ? tableName : $"{patternTableName}çç{tableName}")}çç{columnName}"));
             if (model == null)
                 model = deserialization.Find(x => x.ColumnName == $"{tableName}çç{columnName}");
