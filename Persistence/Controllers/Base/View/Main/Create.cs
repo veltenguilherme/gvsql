@@ -52,6 +52,8 @@ namespace Persistence.Controllers.Base.View.Main
             PatternTableName = Name;
 
             string sqlBase = Resource.view_create.Trim().Replace("{0}", $"view_{Alias ?? Name}");
+            sqlBase = sqlBase.Replace("{3}", Name);
+
             List<string> sqlParams = new List<string>();
             List<string> sqlQueries = new List<string>();
             List<string> sqlJoins = new List<string>();
@@ -98,8 +100,8 @@ namespace Persistence.Controllers.Base.View.Main
             sqlParams.ForEach(x => sqlParam += x);
             sqlQueries.ForEach(x => sqlQuery += x);
             sqlJoins.ForEach(x => sqlJoin += x);
-
-            return sqlBase.Replace("{1}", sqlParam).Replace("{2}", string.Format("select {0} from {1} {2};", sqlQuery, Name, sqlJoin));
+            
+            return sqlBase.Replace("{1}", sqlParam).Replace("{2}", string.Format("select {0} from {1} {2}", sqlQuery, Name, sqlJoin));
         }
 
         private bool IsRedundantJoin(List<string> sqlJoins, string joinTableName)
