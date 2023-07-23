@@ -1,6 +1,5 @@
 ﻿using Persistence.Controllers.Base.CustomAttributes;
 using Persistence.Models;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
@@ -79,7 +78,8 @@ namespace Persistence.Controllers.Base.Table
                 case SqlTypes.BOOLEAN: sql.Add($"{columName} boolean,"); return;
                 case SqlTypes.BYTEA: sql.Add($"{columName} bytea,"); return;
                 case SqlTypes.BYTEA_NOT_NULL: sql.Add($"{columName} bytea NOT NULL,"); return;
-                case SqlTypes.GUID:
+                case SqlTypes.GUID: if (!"uuid".Equals(columName)) sql.Add($"{columName} uuid,"); return;                
+                case SqlTypes.GUID_NOT_NULL: if (!"uuid".Equals(columName)) sql.Add($"{columName} uuid NOT NULL,"); return;                                
                 case SqlTypes.DEFAULT:
                 default: return;
             }
@@ -92,6 +92,6 @@ namespace Persistence.Controllers.Base.Table
                 case SqlTypes.GUID: return "uuid";
                 default: return string.Empty;
             }
-        }        
+        }
     }
 }

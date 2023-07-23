@@ -77,7 +77,8 @@ namespace Persistence.Controllers
                 case Models.SqlTypes.BOOLEAN: return "boolean";
                 case Models.SqlTypes.BYTEA: return "bytea";
                 case Models.SqlTypes.BYTEA_NOT_NULL: return "bytea NOT NULL";
-                case Models.SqlTypes.GUID: return "uuid";
+                case Models.SqlTypes.GUID: return "uuid";                
+                case Models.SqlTypes.GUID_NOT_NULL: return "uuid NOT NULL";                                
                 case Models.SqlTypes.DEFAULT:
                 default: return default;
             }

@@ -11,7 +11,8 @@ namespace Persistence.Models
 
     public enum SqlTypes
     {
-        GUID = 1,
+        GUID = 1,        
+        GUID_NOT_NULL,        
         TEXT,
         TEXT_NOT_NULL,
         TEXT_NOT_NULL_UNIQUE,
