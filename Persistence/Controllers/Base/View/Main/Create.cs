@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 
 namespace Persistence.Controllers.Base.View.Main
-{  
+{
     internal class Create<T>
     {
         private List<KeyValuePair<string, string>> Aliases
@@ -42,7 +42,7 @@ namespace Persistence.Controllers.Base.View.Main
             this.Name = name;
             this.Alias = alias;
             Provider.ExecuteNonQueryAsync(Get()).Wait();
-        }        
+        }
 
         public string Get()
         {
@@ -100,7 +100,7 @@ namespace Persistence.Controllers.Base.View.Main
             sqlParams.ForEach(x => sqlParam += x);
             sqlQueries.ForEach(x => sqlQuery += x);
             sqlJoins.ForEach(x => sqlJoin += x);
-            
+
             return sqlBase.Replace("{1}", sqlParam).Replace("{2}", string.Format("select {0} from {1} {2}", sqlQuery, Name, sqlJoin));
         }
 
@@ -134,11 +134,15 @@ namespace Persistence.Controllers.Base.View.Main
             else
             {
                 ++IndexAlias;
-                string paternAlias = Aliases[IndexAlias - 1].Value;                
+                string patternAlias = Aliases[IndexAlias - 1].Value;
+
+                if (patternTableName != default)
+                    patternAlias = Aliases.Where(x => x.Key == patternTableName).First().Value;
+
                 if (alias.Split("çç".ToCharArray())[0].Equals(PatternTableName))
                     sqlJoins.Add(join);
                 else
-                    sqlJoins.Add($"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {paternAlias}.{fkColumnName}) ");
+                    sqlJoins.Add($"{type} join {joinTableName} as {alias} on ({alias}.{joinColumnName} = {patternAlias}.{fkColumnName}) ");
             }
 
             RedundantJoin = IsRedundantJoin(sqlJoins, joinTableName);
