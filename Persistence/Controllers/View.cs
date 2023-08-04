@@ -62,9 +62,9 @@ namespace Persistence.Controllers
             var sql = $"select * from view_{Alias ?? Name} {query.Sql} offset {offSet}";
 
             if (limit > 0)
-                sql += $"limit {limit}";
+                sql += $" limit {limit}";
 
-            return await ToListAsync(sql);
+            return await Provider.ExecuteReaderAsync(sql);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Persistence.Controllers
             return objs[0];
         }
 
-        public async Task<List<T>> ToListAsync(Query<T> query) => await new View<T>().ToListAsync(query);
+        public async Task<List<T>> ToListAsync(Query<T> query, int limit = 0, int offSet = 0) => await new View<T>().ToListAsync(query, limit, offSet);
 
         public async Task<List<T>> ToListAsync(int limit = 0, int offSet = 0) => await new View<T>().ToListAsync(limit, offSet);
 
@@ -58,6 +58,29 @@ namespace Persistence.Controllers
                 await Provider.Conn.DisposeAsync();
             }
         }
+
+        public async Task<int> CountAsync(Query<T> query)
+        {
+            try
+            {
+                string sql = $"select count(*) from view_{Name} {query.Sql}";
+                Provider.Parameters.AddRange(query.NpgsqlParameters);
+
+                foreach (DbDataRecord record in await Provider.ExecuteReaderRawSqlAsync(sql))
+                    return Convert.ToInt32(record.GetValue(0));
+
+                return -1;
+            }
+            catch (Exception)
+            {
+                return -1;
+            }
+            finally
+            {
+                await Provider.Conn.DisposeAsync();
+            }
+        }
+
 
         public async Task<List<T>> ToListAsync(string sql)
         {
