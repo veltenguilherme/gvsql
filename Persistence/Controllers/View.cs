@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Persistence.Controllers
 {
+    [Base.CustomAttributes.View("opa")]
     public class View<T> : Controller<T>
     {
         public string Alias
@@ -20,7 +21,7 @@ namespace Persistence.Controllers
                     var viewCustomAttribute = typeof(T).GetCustomAttribute<Base.CustomAttributes.View>();
                     var tableAtribute = typeof(T).GetCustomAttribute<TableAttribute>();
 
-                    return viewCustomAttribute == null ? tableAtribute.Name : viewCustomAttribute.Name;
+                    return viewCustomAttribute?.Name ?? tableAtribute.Name;
                 }
                 catch (Exception)
                 {

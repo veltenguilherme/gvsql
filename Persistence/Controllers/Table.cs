@@ -11,17 +11,22 @@ namespace Persistence.Controllers
 {
     public abstract partial class Table<T> : Controller<T>
     {
-        public Table(bool create, bool dropAndCreateView) : base()
+        public Table() : base()
         {
-            if (create)
+            bool exists = Database.TableExists(name: Name);
+
+            if (!exists)
             {
                 Provider.ExecuteNonQueryAsync(new Base.Table.Create().Set<T>(Name)).Wait();
                 new Base.Trigger.UpdateOrInsert.Create<T>();
                 new View<T>();
             }
-            else
-            if (dropAndCreateView)
-                new View<T>(true);
+
+            var viewCustomAttribute = typeof(T).GetCustomAttribute<Base.CustomAttributes.View>();
+            bool viewExists = Database.TableExists(name: $"view_{viewCustomAttribute?.Name ?? Name}");
+
+            if (exists && !viewExists)
+                new View<T>();
         }
 
         internal async Task<T> ToListAsync(object info)
@@ -81,11 +86,7 @@ namespace Persistence.Controllers
             }
         }
 
-
-        public async Task<List<T>> ToListAsync(string sql)
-        {
-            return await new View<T>().ToListAsync(sql);
-        }
+        public async Task<List<T>> ToListAsync(string sql) => await new View<T>().ToListAsync(sql);
 
         public async Task<List<T>> UpdateOrInsertAsync(List<T> objs)
         {

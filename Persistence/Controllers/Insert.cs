@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using Humanizer;
+using Npgsql;
 using Persistence.Controllers.Base;
 using Persistence.Controllers.Base.CustomAttributes;
 using System;
@@ -23,30 +24,20 @@ namespace Persistence.Controllers
             {
                 if (property.GetCustomAttribute<KeyAttribute>() != null ||
                     IsDefaultValue(property, obj) ||
-                    Utils.IsBaseModel(property.PropertyType.BaseType) ||
-                    SetValue(property, obj, ref name, ref value, "inserted") ||
-                    SetValue(property, obj, ref name, ref value, "updated") ||
-                    property.GetCustomAttribute<ColumnAttribute>() == null)
+                    Utils.IsBaseModel(property.PropertyType.BaseType))
                     continue;
 
-                SetValue(ref name, ref value, property.GetCustomAttribute<ColumnAttribute>().Name, property, obj);
+                SetValue(ref name, ref value, property.GetCustomAttribute<ColumnAttribute>()?.Name ?? property.Name.Underscore(), property, obj);
             }
 
-            return await this.ToListAsync(await Provider.ExecuteScalarAsync($"INSERT INTO public.{Name}({name.Remove(name.Length - 1)})VALUES({value.Remove(value.Length - 1)}) returning uuid;"));
-        }
-
-        private bool SetValue(PropertyInfo property, T obj, ref string name, ref string value, string columnAttributeName)
-        {
-            if (property.GetCustomAttribute<ColumnAttribute>() == null ||
-               !property.GetCustomAttribute<ColumnAttribute>().Name.Contains(columnAttributeName))
-                return false;
-
-            SetValue(ref name, ref value, columnAttributeName, property, obj);
-            return true;
+            return await ToListAsync(await Provider.ExecuteScalarAsync($"INSERT INTO public.{Name}({name.Remove(name.Length - 1)})VALUES({value.Remove(value.Length - 1)}) returning uuid;"));
         }
 
         private void SetValue(ref string name, ref string value, string propertyName, PropertyInfo property, T obj)
         {
+            if ("inserted".Equals(propertyName) || "updated".Equals(propertyName))
+                return;
+
             name += $"{propertyName},";
             value += $"@{propertyName},";
             Provider.Parameters.Add(new NpgsqlParameter(propertyName, GetValue(obj, property)));

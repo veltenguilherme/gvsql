@@ -1,5 +1,5 @@
-﻿using Npgsql;
-using Persistence.Controllers;
+﻿using Humanizer;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -42,7 +42,6 @@ namespace Persistence
             finally
             {
                 CreateTables(schema);
-                CreateViews(schema);
             }
         }
 
@@ -76,9 +75,9 @@ namespace Persistence
 
             schema.ForEach(x =>
             {
-                if (!TableExists(x.Model))
-                    Activator.CreateInstance(x.Table, new object[] { true, false });
-                else
+                Activator.CreateInstance(x.Table);
+
+                if (TableExists(x.Model))
                 {
                     DropColumns(x.Model);
                     CreateColumns(x.Model);
@@ -156,8 +155,8 @@ namespace Persistence
 
                         try
                         {
-                            type = Table<dynamic>.GetDataType(prop.GetCustomAttribute<Controllers.Base.CustomAttributes.SqlType>().Type);
-                            columnName = prop.GetCustomAttribute<ColumnAttribute>().Name;
+                            type = GetDataType(prop.GetCustomAttribute<Controllers.Base.CustomAttributes.SqlType>().Type);
+                            columnName = prop.GetCustomAttribute<ColumnAttribute>()?.Name ?? prop.Name.Underscore();
 
                             command = $"ALTER TABLE {tableName} ADD COLUMN IF NOT EXISTS {columnName} {type}";
                             new NpgsqlCommand(command, conn).ExecuteNonQuery();
@@ -173,7 +172,7 @@ namespace Persistence
 
                                 command = $"UPDATE {tableName} SET {columnName} = @{columnName}";
                                 var pgsqlCommand = new NpgsqlCommand(command, conn);
-                                pgsqlCommand.Parameters.AddWithValue(columnName, defaultValue != default ? defaultValue : Table<dynamic>.GetDefaultValue(typeWithoutNotNull));
+                                pgsqlCommand.Parameters.AddWithValue(columnName, defaultValue != default ? defaultValue : GetDefaultValue(typeWithoutNotNull));
                                 pgsqlCommand.ExecuteNonQuery();
 
                                 command = $"ALTER TABLE {tableName} ALTER COLUMN {columnName} SET NOT NULL";
@@ -191,27 +190,16 @@ namespace Persistence
             }
         }
 
-        private void CreateViews(List<Structure> schema)
-        {
-            if (!Exists)
-                return;
-
-            schema.ForEach(x =>
-            {
-                Activator.CreateInstance(x.Table, new object[] { false, true });
-            });
-        }
-
-        private static bool TableExists(Type model)
+        public static bool TableExists(Type model = default, string name = default)
         {
             using (NpgsqlConnection conn = new NpgsqlConnection(GetConnectionString(Name)))
             {
-                conn.Open();                
+                conn.Open();
                 var tableName = new NpgsqlCommand($@"SELECT coalesce(table_name, ' ')
                                                        FROM information_schema.tables
                                                       WHERE table_schema = current_schema()
-                                                        AND table_name = '{Activator.CreateInstance(model).GetType().GetCustomAttribute<TableAttribute>().Name}'", conn).ExecuteScalar();
-                
+                                                        AND table_name = '{name ?? Activator.CreateInstance(model).GetType().GetCustomAttribute<TableAttribute>().Name}'", conn).ExecuteScalar();
+
                 conn.Close();
                 return !(tableName == null || string.IsNullOrEmpty(tableName.ToString()) || string.IsNullOrWhiteSpace(tableName.ToString()));
             }
@@ -237,6 +225,56 @@ namespace Persistence
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        private static string GetDataType(Models.SqlTypes type)
+        {
+            return type switch
+            {
+                Models.SqlTypes.TEXT_UNIQUE => "text UNIQUE",
+                Models.SqlTypes.TEXT_NOT_NULL => "text NOT NULL",
+                Models.SqlTypes.TEXT_NOT_NULL_UNIQUE => "text NOT NULL UNIQUE",
+                Models.SqlTypes.TEXT => "text",
+                Models.SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE_NOT_NULL => "timestamp without time zone NOT NULL",
+                Models.SqlTypes.TIMESTAMP_WITHOUT_TIME_ZONE => "timestamp without time zone",
+                Models.SqlTypes.DATE => "date",
+                Models.SqlTypes.DATE_NOT_NULL => "date NOT NULL",
+                Models.SqlTypes.INTEGER => "integer",
+                Models.SqlTypes.INTEGER_NOT_NULL => "integer NOT NULL",
+                Models.SqlTypes.INTEGER_NOT_NULL_UNIQUE => "integer NOT NULL UNIQUE",
+                Models.SqlTypes.BIG_INT => "bigint",
+                Models.SqlTypes.NUMERIC_DEFAULT_VALUE_0 => "numeric DEFAULT 0.00",
+                Models.SqlTypes.BOOLEAN => "boolean",
+                Models.SqlTypes.BYTEA => "bytea",
+                Models.SqlTypes.BYTEA_NOT_NULL => "bytea NOT NULL",
+                Models.SqlTypes.GUID => "uuid",
+                Models.SqlTypes.GUID_NOT_NULL => "uuid NOT NULL",
+                _ => default,
+            };
+        }
+
+        private static object GetDefaultValue(string type)
+        {
+            switch (type)
+            {
+                case "text":
+                case "integer":
+                case "bigint":
+                case "numeric":
+                case "bytea":
+                default:
+                    return 0;
+
+                case "boolean":
+                    return false;
+
+                case "uuid":
+                    return Guid.NewGuid();
+
+                case "date":
+                case "timestamp":
+                    return DateTime.MinValue;
             }
         }
     }

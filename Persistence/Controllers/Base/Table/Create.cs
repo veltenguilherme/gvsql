@@ -1,4 +1,5 @@
-﻿using Persistence.Controllers.Base.CustomAttributes;
+﻿using Humanizer;
+using Persistence.Controllers.Base.CustomAttributes;
 using Persistence.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,12 +19,14 @@ namespace Persistence.Controllers.Base.Table
 
             foreach (PropertyInfo property in typeof(T).GetProperties())
             {
-                string columnName = property.GetCustomAttribute<ColumnAttribute>() == null ? null : property.GetCustomAttribute<ColumnAttribute>().Name;
-                string fkTableName = property.GetCustomAttribute<SqlFk>() == null ? null : property.GetCustomAttribute<SqlFk>().TableName;
-                string fkColumnName = property.GetCustomAttribute<SqlFk>() == null ? null : property.GetCustomAttribute<SqlFk>().ColumnName;
+                if (Utils.IsBaseModel(property.PropertyType.BaseType)) continue;
 
-                SqlTypes dataType = property.GetCustomAttribute<CustomAttributes.SqlType>() == null ? SqlTypes.DEFAULT : property.GetCustomAttribute<CustomAttributes.SqlType>().Type;
-                SqlFkTypes fkType = property.GetCustomAttribute<SqlFk>() == null ? SqlFkTypes.DEFAULT : property.GetCustomAttribute<SqlFk>().Type;
+                string columnName = property.GetCustomAttribute<ColumnAttribute>()?.Name ?? property.Name.Underscore();
+                string fkTableName = property.GetCustomAttribute<SqlJoin>()?.TableName;
+                string fkColumnName = property.GetCustomAttribute<SqlJoin>()?.ColumnName;
+
+                SqlTypes dataType = property.GetCustomAttribute<SqlType>() == null ? SqlTypes.DEFAULT : property.GetCustomAttribute<SqlType>().Type;
+                SqlFkTypes fkType = property.GetCustomAttribute<SqlJoin>() == null ? SqlFkTypes.DEFAULT : property.GetCustomAttribute<SqlJoin>().FkType;
 
                 if (SetForeignKey(fkType, dataType, columnName, fkColumnName, fkTableName, ref sqlQueries))
                     continue;
@@ -64,6 +67,7 @@ namespace Persistence.Controllers.Base.Table
         {
             switch (type)
             {
+                case SqlTypes.TEXT_UNIQUE: sql.Add($"{columName} text UNIQUE,"); return;
                 case SqlTypes.TEXT_NOT_NULL: sql.Add($"{columName} text NOT NULL,"); return;
                 case SqlTypes.TEXT_NOT_NULL_UNIQUE: sql.Add($"{columName} text NOT NULL UNIQUE,"); return;
                 case SqlTypes.TEXT: sql.Add($"{columName} text,"); return;
@@ -73,6 +77,7 @@ namespace Persistence.Controllers.Base.Table
                 case SqlTypes.DATE_NOT_NULL: sql.Add($"{columName} date NOT NULL,"); return;
                 case SqlTypes.INTEGER: sql.Add($"{columName} integer,"); return;
                 case SqlTypes.INTEGER_NOT_NULL: sql.Add($"{columName} integer NOT NULL,"); return;
+                case SqlTypes.INTEGER_NOT_NULL_UNIQUE: sql.Add($"{columName} integer NOT NULL UNIQUE,"); return;
                 case SqlTypes.BIG_INT: sql.Add($"{columName} bigint,"); return;
                 case SqlTypes.NUMERIC_DEFAULT_VALUE_0: sql.Add($"{columName} numeric DEFAULT 0.00,"); return;
                 case SqlTypes.BOOLEAN: sql.Add($"{columName} boolean,"); return;

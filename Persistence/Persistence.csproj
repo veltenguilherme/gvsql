@@ -5,7 +5,7 @@
 	<LangVersion>8.0</LangVersion>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<PackageId>gvsql</PackageId>
-	<Version>2.0.12</Version>
+	<Version>2.1.12</Version>
 	<Description>A C# framework for persistence, query lambda and creation of postgresql data schemas, similar to the Microsoft Entity Framework.</Description>
 	<Authors>gvelten</Authors>
 	<Company>veltenguilherme@gmail.com</Company>
@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Npgsql" Version="7.0.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Humanizer;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -37,13 +38,13 @@ namespace Persistence.Controllers.Base.Queries.Exp.Base
                 if (memberExpression != null)
                 {
                     SetTableName(memberExpression, memberExpression.Type.GetCustomAttribute<TableAttribute>().Name, ref tableName);
-                    columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>().Name;
+                    columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>()?.Name ?? ((MemberExpression)obj).Member.Name.Underscore();
                 }
             }
             catch
             {
                 tableName = ((ParameterExpression)((MemberExpression)obj).Expression).Type.GetCustomAttribute<TableAttribute>().Name;
-                columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>().Name;
+                columnName = ((MemberExpression)obj).Member.GetCustomAttribute<ColumnAttribute>()?.Name ?? ((MemberExpression)obj).Member.Name.Underscore();
             }
 
             return $"{tableName}çç{columnName}";

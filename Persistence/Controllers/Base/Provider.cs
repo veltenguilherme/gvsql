@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using Humanizer;
+using Npgsql;
 using Persistence.Controllers.Base.CustomAttributes;
 using Persistence.Controllers.Base.IO.Deserialization;
 using System;
@@ -196,7 +197,6 @@ namespace Persistence.Controllers.Base
 
                     collection.Add(domain);
                 }
-                
             }
             catch (Exception ex)
             {
@@ -280,22 +280,18 @@ namespace Persistence.Controllers.Base
 
             if (Utils.IsBaseModel(property.PropertyType.BaseType))
             {
-                patternTableName = property.GetCustomAttribute<SqlJoinType>()?.PatternTableName;
+                patternTableName = property.GetCustomAttribute<SqlJoin>()?.TableName;
                 DeserializeChild(deserialization, property, property.GetValue(target), target, patternTableName);
                 return;
             }
 
-            if (property.GetCustomAttribute<ColumnAttribute>() == null)
-                return;
-
-            string columnName = property.GetCustomAttribute<ColumnAttribute>().Name;
+            string columnName = property.GetCustomAttribute<ColumnAttribute>()?.Name ?? property.Name.Underscore();
             if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName))
                 return;
 
             string tableName = target.GetType().GetCustomAttribute<TableAttribute>().Name;
             Model model = deserialization.Find(x => x.ColumnName == string.Format($"{(patternTableName == null ? tableName : $"{patternTableName}çç{tableName}")}çç{columnName}"));
-            if (model == null)
-                model = deserialization.Find(x => x.ColumnName == $"{tableName}çç{columnName}");
+            model ??= deserialization.Find(x => x.ColumnName == $"{tableName}çç{columnName}");
 
             patternTableName = null;
 
