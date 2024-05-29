@@ -56,6 +56,17 @@ namespace Persistence.Controllers
             return await Provider.ExecuteReaderAsync(sql);
         }
 
+        public async virtual Task<List<M>> ToListRawAsync<M>(string sql, int limit = 0, int offSet = 0)
+        {
+            sql = $"{sql} offset {offSet}";
+
+            if (limit > 0)
+                sql += $" limit {limit}";
+
+            var provider = new Provider<M>();
+            return await provider.ExecuteReaderRawAsync(sql);            
+        }
+
         public async Task<List<T>> ToListAsync(Query<T> query, int limit = 0, int offSet = 0)
         {
             Provider.Parameters.AddRange(query.NpgsqlParameters);

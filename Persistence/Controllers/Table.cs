@@ -42,6 +42,8 @@ namespace Persistence.Controllers
 
         public async Task<List<T>> ToListAsync(Query<T> query, int limit = 0, int offSet = 0) => await new View<T>().ToListAsync(query, limit, offSet);
 
+        public async Task<List<M>> ToListRawAsync<M>(string sql, int limit = 0, int offSet = 0) => await new View<T>().ToListRawAsync<M>(sql, limit, offSet);
+
         public async Task<List<T>> ToListAsync(int limit = 0, int offSet = 0) => await new View<T>().ToListAsync(limit, offSet);
 
         public async Task<int> CountAsync()

@@ -211,6 +211,66 @@ namespace Persistence.Controllers.Base
             return collection;
         }
 
+        internal async Task<List<T>> ExecuteReaderRawAsync(string sql)
+        {
+            if (!Database.Exists)
+                return default;
+
+            List<T> collection = Activator.CreateInstance<List<T>>();
+
+            try
+            {
+                var command = await GetCommand(sql);
+                if (command == null)
+                    return collection;
+
+                foreach (DbDataRecord record in await command.ExecuteReaderAsync())
+                {
+                    T domain = Activator.CreateInstance<T>();
+                    if (record == null || record == default(DbDataRecord)) continue;
+
+                    Collection deserialization = new Collection(record);
+                    if (deserialization == null || deserialization.Count < 1) continue;
+
+                    foreach (PropertyInfo property in typeof(T).GetProperties())
+                    {
+                        if (property.GetMethod == default) continue;
+
+                        string columnName = property.GetCustomAttribute<ColumnAttribute>()?.Name ?? property.Name.Underscore();
+                        if (string.IsNullOrEmpty(columnName) || string.IsNullOrWhiteSpace(columnName)) continue;
+
+                        Model model = deserialization.Find(x => x.ColumnName == columnName);
+                        model ??= deserialization.Find(x => x.ColumnName == $"{columnName}");
+
+                        if (model == null ||
+                            property.SetMethod == default)
+                            continue;
+
+                        property.SetValue(domain, model.Value == DBNull.Value ? null : model.Value);
+                    }
+
+                    if (domain == null)
+                        continue;
+
+                    if (collection == null)
+                        collection = new List<T>();
+
+                    collection.Add(domain);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                Parameters = new List<NpgsqlParameter>();
+                await Conn.DisposeAsync();
+            }
+
+            return collection;
+        }
+
         internal List<T> ExecuteReader(string sql)
         {
             if (!Database.Exists)
