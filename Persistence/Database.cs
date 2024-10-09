@@ -34,14 +34,11 @@ namespace Persistence
             try
             {
                 CreateDb();
+                CreateTables(schema);
             }
             catch
             {
                 Exists = false;
-            }
-            finally
-            {
-                CreateTables(schema);
             }
         }
 
@@ -53,13 +50,21 @@ namespace Persistence
                 Exists = Convert.ToInt32(new NpgsqlCommand($"SELECT count(*) FROM pg_catalog. pg_database WHERE lower(datname) = lower('{Name}')", conn).ExecuteScalar()) > 0;
 
                 if (Exists)
+                {
+                    GenerateUuidOssp();
                     return;
+                }
 
                 new NpgsqlCommand($"CREATE DATABASE {Name}", conn).ExecuteNonQuery();
                 conn.Close();
                 Exists = true;
-            }
 
+                GenerateUuidOssp();
+            }
+        }
+
+        private static void GenerateUuidOssp()
+        {
             using (NpgsqlConnection conn = new NpgsqlConnection(GetConnectionString(Name)))
             {
                 conn.Open();
