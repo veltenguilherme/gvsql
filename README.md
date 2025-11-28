@@ -33,13 +33,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Author
-
-**gvelten**
-
-- Email: veltenguilherme@gmail.com
-
-## Repository
-
-- GitHub: [https://github.com/gvelten/gvsql](https://github.com/gvelten/gvsql)
 
