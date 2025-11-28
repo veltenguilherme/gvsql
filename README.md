@@ -1,7 +1,3 @@
-# gvsql
-
-A C# framework for persistence, query lambda and creation of postgresql data schemas, similar to the Microsoft Entity Framework.
-
 ## Features
 
 - PostgreSQL database persistence
