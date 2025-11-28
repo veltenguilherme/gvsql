@@ -112,15 +112,15 @@ namespace Persistence.Controllers
 
             foreach (var x in objs)
             {
-                int result = await RemoveAsync(x);
-                if (result > 0)
+                string result = await RemoveAsync(x);
+                if (!string.IsNullOrEmpty(result))
                     Add(x);
             }
 
             return this;
         }
 
-        public async Task<int> RemoveAsync(T obj)
+        public async Task<string> RemoveAsync(T obj)
         {
             if (obj == null)
                 throw new ArgumentNullException();
@@ -136,8 +136,55 @@ namespace Persistence.Controllers
                 }
             }
 
-            string sql = $"DELETE FROM public.{Name} WHERE uuid = '{uuid}';";
-            return await Provider.ExecuteNonQueryAsync(sql);
+            if (uuid == null)
+                return default;
+
+            return await RemoveAsync(uuid.Value);
+        }
+
+        public async Task<string> RemoveAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentNullException();
+
+            if (!Guid.TryParse(id, out Guid uuid))
+                throw new ArgumentException("The ID provided is not a valid Guid.", nameof(id));
+
+            return await RemoveAsync(uuid);
+        }
+
+        public async Task<string> RemoveAsync(Guid id)
+        {
+            string sql = $"DELETE FROM public.{Name} WHERE uuid = '{id}';";
+            var result = await Provider.ExecuteNonQueryAsync(sql);
+
+            if (result > 0)
+                return id.ToString();
+
+            return default;
+        }
+
+        public async Task<List<string>> RemoveAsync(List<string> ids)
+        {
+            if (ids == null || ids.Count <= 0)
+                throw new ArgumentNullException();
+
+            List<string> removedIds = new List<string>();
+
+            foreach (var id in ids)
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                    continue;
+
+                if (!Guid.TryParse(id, out Guid uuid))
+                    continue;
+              
+                string result = await RemoveAsync(uuid);
+                if (!string.IsNullOrEmpty(result))
+                    removedIds.Add(id);
+            }
+
+            return removedIds;
         }
 
         public async Task<int> RemoveAllAsync()

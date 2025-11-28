@@ -1,0 +1,45 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code files
+*.cs text diff=csharp
+*.csproj text
+*.sln text
+*.md text
+*.txt text
+*.json text
+
+# SQL files
+*.sql text
+
+# Resource files
+*.resx text
+*.resw text
+
+# Binary files
+*.dll binary
+*.pdb binary
+*.exe binary
+*.nupkg binary
+*.snk binary
+
+# Visual Studio files
+*.suo binary
+*.user binary
+*.userosscache binary
+*.sln.docstates binary
+
+# Build results
+[Dd]ebug/ binary
+[Rr]elease/ binary
+[Bb]in/ binary
+[Oo]bj/ binary
+
+# NuGet packages
+*.nupkg binary
+
+# Ignore line ending differences for these files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+

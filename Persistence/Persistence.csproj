@@ -3,13 +3,36 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	<LangVersion>8.0</LangVersion>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<!-- Gerar pacote apenas em Release -->
+	<GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
+	<GeneratePackageOnBuild Condition="'$(Configuration)' != 'Release'">false</GeneratePackageOnBuild>
 	<PackageId>gvsql</PackageId>
-	<Version>2.1.14</Version>
+	<Version>2.1.15</Version>
 	<Description>A C# framework for persistence, query lambda and creation of postgresql data schemas, similar to the Microsoft Entity Framework.</Description>
 	<Authors>gvelten</Authors>
 	<Company>veltenguilherme@gmail.com</Company>
 	<Product>gvsql</Product>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageProjectUrl>https://github.com/gvelten/gvsql</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/gvelten/gvsql</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>postgresql;orm;entity-framework;persistence;lambda;query</PackageTags>
+	<!-- Configurações para não expor código fonte no NuGet -->
+	<DebugType>none</DebugType>
+	<DebugSymbols>false</DebugSymbols>
+	<IncludeSymbols>false</IncludeSymbols>
+	<IncludeSource>false</IncludeSource>
+	<!-- Desabilitar SourceLink para não expor código fonte -->
+	<Deterministic>true</Deterministic>
+	<PublishRepositoryUrl>false</PublishRepositoryUrl>
+	<EmbedAllSources>false</EmbedAllSources>
+  </PropertyGroup>
+  
+  <!-- Configurações específicas para Release -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+	<DebugType>none</DebugType>
+	<DebugSymbols>false</DebugSymbols>
+	<Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,5 +47,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
+
+  <!-- Excluir explicitamente arquivos de debug do pacote NuGet -->
+  <ItemGroup>
+    <None Include="$(OutputPath)$(AssemblyName).pdb" Pack="false" />
+    <None Include="$(OutputPath)$(AssemblyName).mdb" Pack="false" />
+  </ItemGroup>
+  
+  <!-- Target para garantir que nenhum arquivo de debug seja incluído -->
+  <Target Name="ExcludeDebugFilesFromPackage" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <_PackageFilesToExclude Include="@(FileWrites)" Condition="'%(Extension)' == '.pdb'" />
+      <_PackageFilesToExclude Include="@(FileWrites)" Condition="'%(Extension)' == '.mdb'" />
+      <_PackageFilesToExclude Include="@(FileWrites)" Condition="'%(Filename)' == '$(AssemblyName).sourcelink'" />
+      <_PackageFilesToExclude Include="@(FileWrites)" Condition="'%(Filename)' == '$(AssemblyName).sourcelink.json'" />
+    </ItemGroup>
+  </Target>
 
 </Project>
