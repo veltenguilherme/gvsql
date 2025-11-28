@@ -26,7 +26,7 @@ Install-Package gvsql
 ## Usage
 
 ```csharp
-// Example usage coming soon
+https://github.com/veltenguilherme/gvsql-asp-net-sample/blob/master/Controllers/SalesController.cs
 ```
 
 ## License
