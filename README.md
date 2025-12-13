@@ -25,11 +25,7 @@ Install-Package gvsql
 
 ## Uso
 
-Veja um exemplo de uso em:
-
-```
-https://github.com/veltenguilherme/gvsql-asp-net-sample/blob/master/Controllers/SalesController.cs
-```
+🔗 Repositório: https://github.com/veltenguilherme/gvsql-asp-net-sample
 
 ## Licença
 
