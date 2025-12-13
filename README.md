@@ -21,9 +21,7 @@ Install-Package gvsql
 
 ## Usage
 
-```
-https://github.com/veltenguilherme/gvsql-asp-net-sample
-```
+🔗 **Repository**: [https://github.com/veltenguilherme/gvsql](https://github.com/veltenguilherme/gvsql)
 
 ## License
 
