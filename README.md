@@ -1,49 +1,49 @@
 # gvsql
 
-A C# framework for persistence, query lambda and creation of postgresql data schemas, similar to the Microsoft Entity Framework.
+Um framework C# para persistência, consultas lambda e criação de esquemas de dados PostgreSQL, similar ao Microsoft Entity Framework.
 
-## Features
+## Funcionalidades
 
-- PostgreSQL database persistence
-- Lambda query expressions
-- Automatic schema creation
-- Similar to Entity Framework Core
+- Persistência de banco de dados PostgreSQL
+- Expressões de consulta lambda
+- Criação automática de esquemas
+- Similar ao Entity Framework Core
 
-## Installation
+## Instalação
 
-Install the package via NuGet:
+Instale o pacote via NuGet:
 
 ```bash
 dotnet add package gvsql
 ```
 
-Or via Package Manager:
+Ou via Package Manager:
 
 ```
 Install-Package gvsql
 ```
 
-## Usage
+## Uso
 
 ```csharp
 https://github.com/veltenguilherme/gvsql-asp-net-sample/blob/master/Controllers/SalesController.cs
 ```
 
-## License
+## Licença
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## Contributing
+## Contribuindo
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contribuições são bem-vindas! Sinta-se à vontade para enviar um Pull Request.
 
-## Author
+## Autor
 
 **gvelten**
 
 - Email: veltenguilherme@gmail.com
 
-## Repository
+## Repositório
 
 - GitHub: [https://github.com/gvelten/gvsql](https://github.com/gvelten/gvsql)
 
